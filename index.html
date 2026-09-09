@@ -3,101 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ŞL Tahmin Ligi: GS & FB</title>
+    <title>ŞL Tahmin Oyunu</title>
+    <!-- Google Fonts: Inter (Ana Font) ve Caveat (El Yazısı) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome İkonları -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --bg-color: #121212; --text-color: #f1f1f1; --primary: #4CAF50;
-            --gs-color1: #a90432; --gs-color2: #fdb912; --fb-color1: #001e60; --fb-color2: #edee00;
-            --card-bg: #1e1e1e;
+            --bg-dark: #010a1f; 
+            --cl-blue: #003399;
+            --neon-blue: #00a3ff;
+            --text-main: #ffffff;
+            --glass-bg: rgba(4, 20, 60, 0.6);
+            --glass-border: rgba(0, 163, 255, 0.4);
+            --gs-color1: #a90432; --gs-color2: #fdb912; 
+            --fb-color1: #001e60; --fb-color2: #edee00;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        h1, h2, h3 { text-align: center; }
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
-        .tab-btn { background-color: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .tab-btn.active { background-color: var(--primary); }
-        .section { display: none; background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 100%, #0a3a82 0%, transparent 60%),
+                radial-gradient(circle at 50% 0%, #051d45 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .container { width: 100%; max-width: 1050px; }
+
+        .top-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-top: 10px;
+        }
+        .header-left { font-size: 11px; letter-spacing: 2px; line-height: 1.6; text-transform: uppercase; font-weight: 600; color: #d0e5ff; }
+        .header-center { text-align: center; font-weight: 800; font-size: 22px; letter-spacing: 1px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .header-center i { font-size: 28px; }
+        .header-right { font-family: 'Caveat', cursive; font-size: 42px; transform: rotate(-8deg); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); color: #fff; line-height: 0.9; }
+
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 163, 255, 0.1);
+            padding: 25px; margin-bottom: 25px; animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .action-btns button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-left: 5px; transition: 0.2s; }
+        .action-btns button:hover { background: rgba(255,255,255,0.2); }
+        .btn-delete:hover { background: #da3633 !important; border-color: #da3633 !important; }
+
+        .tabs { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+        .tab-btn { background: transparent; border: 1px solid var(--glass-border); color: #8bb4e5; padding: 10px 20px; cursor: pointer; border-radius: 30px; font-weight: 600; font-size: 14px; transition: all 0.3s; }
+        .tab-btn:hover { background: rgba(0, 163, 255, 0.1); color: #fff; }
+        .tab-btn.active { background: var(--neon-blue); border-color: var(--neon-blue); color: #fff; box-shadow: 0 0 15px rgba(0, 163, 255, 0.5); }
+
+        .section { display: none; }
         .section.active { display: block; }
-        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #555; background: #222; color: white; }
-        button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
-        button:hover { opacity: 0.9; }
-        .match-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #444; }
-        .match-row:last-child { border-bottom: none; }
-        .match-info { flex: 1; padding-right: 10px; }
-        .match-info strong { font-size: 14px; display: block; margin-bottom: 3px; }
-        .match-info span { font-size: 13px; color: #ccc; }
-        .team-title { padding: 10px; border-radius: 5px; margin-top: 20px; font-weight: bold; text-align: center; }
-        .gs-title { background: linear-gradient(90deg, var(--gs-color1) 50%, var(--gs-color2) 50%); color: white; text-shadow: 1px 1px 2px black; }
-        .fb-title { background: linear-gradient(90deg, var(--fb-color1) 50%, var(--fb-color2) 50%); color: white; text-shadow: 1px 1px 2px black; }
-        .options { display: flex; gap: 5px; }
-        .options label { cursor: pointer; padding: 6px 10px; background: #333; border-radius: 3px; font-size: 14px; text-align: center; min-width: 30px; }
-        .options input:checked + span { color: var(--primary); font-weight: bold; }
+
+        /* YENİ GİRİŞ EKRANI TASARIMI */
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+        @media (max-width: 600px) {
+            .user-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .user-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-card:hover {
+            background: rgba(0, 163, 255, 0.2);
+            border-color: var(--neon-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,163,255,0.3);
+        }
+        .avatar-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid #a5ccff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+        }
+        .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-wrapper i { font-size: 32px; color: #a5ccff; }
+        .user-name { font-weight: 600; color: #fff; font-size: 16px; letter-spacing: 0.5px; }
+
+        /* PUAN TABLOSU VE KÜÇÜK AVATARLAR */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #444; }
-        th { background-color: #333; font-size: 14px; }
-        .logout-btn { background-color: #d32f2f; margin-top: 10px; }
-        .notification { background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 5px; display: none; margin-bottom: 15px; }
-        .status-badge { display: inline-block; background-color: #555; padding: 5px 10px; border-radius: 15px; font-size: 12px; margin-bottom: 10px; }
+        th { padding: 15px 10px; text-align: center; color: #a5ccff; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-bottom: 2px solid var(--neon-blue); }
+        th i { margin-right: 5px; font-size: 14px; }
+        td { padding: 16px 10px; text-align: center; border-bottom: 1px solid rgba(0, 163, 255, 0.2); font-size: 16px; font-weight: 600; }
+        tr:hover td { background: rgba(0, 163, 255, 0.05); }
+        tr:last-child td { border-bottom: none; }
+        .rank-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; }
+        .name-col { text-align: left !important; display: flex; align-items: center; gap: 15px; font-size: 16px !important;}
+        .score-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+
+        .small-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #a5ccff;
+            overflow: hidden;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+        }
+        .small-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .small-avatar i { font-size: 18px; color: #a5ccff; }
+
+        .main-btn { background: linear-gradient(135deg, #0055ff, #00a3ff); color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 15px; width: 100%; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .main-btn:hover { box-shadow: 0 0 20px rgba(0,163,255,0.6); transform: translateY(-2px); }
+
+        /* YAN YANA GÖRÜNÜM (KOMPAKT TASARIM) */
+        .fixtures-container { display: flex; gap: 20px; justify-content: space-between; }
+        .fixture-column { flex: 1; min-width: 0; }
+        
+        .team-title { text-align: center; font-weight: 800; font-size: 16px; padding: 10px; margin: 0 0 15px 0; border-radius: 6px; letter-spacing: 1px; }
+        .gs-title { background: linear-gradient(90deg, var(--gs-color1), var(--gs-color2)); color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .fb-title { background: linear-gradient(90deg, var(--fb-color1), var(--fb-color2)); color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+
+        .match-row { display: flex; flex-direction: column; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,0.15); gap: 10px; }
+        .match-row:last-child { border-bottom: none; }
+        
+        .match-info-top { display: flex; justify-content: space-between; align-items: flex-end; }
+        .match-info-top strong { font-size: 13px; color: #a5ccff; margin-bottom: 2px; display: block;}
+        .match-info-top span.team-name { font-size: 15px; font-weight: 600; color: #fff;}
+        .lock-status { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-align: right;}
+
+        .options { display: flex; gap: 8px; width: 100%; justify-content: space-between; }
+        .options label { 
+            flex: 1; cursor: pointer; padding: 8px 0; text-align: center; 
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); 
+            border-radius: 6px; font-size: 13px; font-weight: 600; transition: 0.2s;
+        }
+        .options label:hover { background: rgba(0, 163, 255, 0.2); border-color: var(--neon-blue); }
+        .options input { display: none; }
+        .options input:checked + span { color: var(--neon-blue); font-size: 14px; }
+        .options input:checked + span::before { content: "✓ "; }
+        .options.disabled label { opacity: 0.3; cursor: not-allowed; }
+
+        .notification { background: #2ea043; color: white; text-align: center; padding: 12px; border-radius: 8px; display: none; margin-bottom: 20px; font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .fixtures-container { flex-direction: column; gap: 30px; }
+            .top-header { flex-direction: column; gap: 15px; text-align: center; }
+            .header-right { font-size: 32px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏆 ŞL Tahmin Ligi</h1>
-    <div id="notification" class="notification">Veriler güncellendi!</div>
-    
-    <div id="loginSection" class="section active">
-        <h2>Giriş Yap</h2>
-        <p>En fazla 6 kişi katılabilir.</p>
-        <input type="text" id="username" placeholder="Mahlasınız (Örn: Maestro)">
-        <button onclick="login()">Giriş</button>
-        <div id="loginError" style="color: #ff5252; margin-top: 10px; text-align: center;"></div>
+    <div class="top-header">
+        <div class="header-left">DOĞRU TAHMİN<br>DAHA FAZLA<br>PUAN</div>
+        <div class="header-center">
+            <i class="fa-regular fa-futbol"></i>
+            <div>UEFA<br>CHAMPIONS<br>LEAGUE</div>
+        </div>
+        <div class="header-right">Tahmin<br>Oyunu</div>
     </div>
 
-    <div id="appContainer" style="display: none;">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('tahminTab')">Tahmin Yap</button>
-            <button class="tab-btn" onclick="showTab('sonucTab')">Gerçek Sonuçlar</button>
-            <button class="tab-btn" onclick="showTab('puanTab')">Puan Durumu</button>
-        </div>
-        <p style="text-align: center;">Kullanıcı: <b id="currentUserDisplay"></b> <button class="logout-btn" style="width: auto; padding: 5px 10px; font-size: 12px;" onclick="logout()">Çıkış</button></p>
-
-        <div id="tahminTab" class="section active">
-            <h2>Tahminlerin</h2>
-            <div id="tahminListesi"></div>
-            <button onclick="kaydetTahminler()" style="margin-top: 20px;">Tahminleri Buluta Kaydet</button>
-        </div>
-
-        <div id="sonucTab" class="section">
-            <h2>Haftanın Gerçek Sonuçları</h2>
-            <p style="font-size: 13px; color: #aaa; text-align: center;">Maçlar oynandıkça sonuçları işaretleyip kaydedin. Tablo hafta hafta güncellenecektir.</p>
-            <div id="sonucListesi"></div>
-            <button onclick="kaydetGercekSonuclar()" style="margin-top: 20px;">Sonuçları Buluta Kaydet</button>
-        </div>
-
-        <div id="puanTab" class="section">
-            <div style="text-align: center;">
-                <h2>Canlı Puan Durumu</h2>
-                <div class="status-badge" id="oynananMacRozeti">Değerlendirilen Maç: 0 / 16</div>
+    <div id="notification" class="notification">Veriler güncellendi!</div>
+    
+    <!-- YENİ PROFİL SEÇİMLİ GİRİŞ EKRANI -->
+    <div id="loginSection" class="section active">
+        <div class="glass-card" style="max-width: 550px; margin: 0 auto; text-align: center;">
+            <h2 style="margin-top: 0;">Kimsiniz?</h2>
+            <p style="color: #a5ccff; font-size: 14px;">Oyuna katılmak için kendi profilinize tıklayın.</p>
+            
+            <div class="user-grid">
+                <!-- Emrah -->
+                <div class="user-card" onclick="login('Emrah', 'emrah')">
+                    <div class="avatar-wrapper">
+                        <img src="emrah.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    <div class="user-name">Emrah</div>
+                </div>
+                <!-- Fatih -->
+                <div class="user-card" onclick="login('Fatih', 'fatih')">
+                    <div class="avatar-wrapper">
+                        <img src="fatih.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    <div class="user-name">Fatih</div>
+                </div>
+                <!-- Yiğit -->
+                <div class="user-card" onclick="login('Yiğit', 'yigit')">
+                    <div class="avatar-wrapper">
+                        <img src="yigit.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    <div class="user-name">Yiğit</div>
+                </div>
+                <!-- Soner -->
+                <div class="user-card" onclick="login('Soner', 'soner')">
+                    <div class="avatar-wrapper">
+                        <img src="soner.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    <div class="user-name">Soner</div>
+                </div>
+                <!-- Sedat -->
+                <div class="user-card" onclick="login('Sedat', 'sedat')">
+                    <div class="avatar-wrapper">
+                        <img src="sedat.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    <div class="user-name">Sedat</div>
+                </div>
+                <!-- Yasin -->
+                <div class="user-card" onclick="login('Yasin', 'yasin')">
+                    <div class="avatar-wrapper">
+                        <img src="yasin.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    <div class="user-name">Yasin</div>
+                </div>
             </div>
+            
+        </div>
+    </div>
+
+    <!-- Uygulama İçi -->
+    <div id="appContainer" style="display: none;">
+        <div class="glass-card">
+            <div class="header-bar">
+                <div style="display: flex; align-items: center; gap: 10px; font-weight: 800;">
+                    <div class="small-avatar" id="headerAvatar"></div>
+                    <span id="currentUserDisplay"></span>
+                </div>
+                <div class="action-btns">
+                    <!-- Gizli dosya yükleme inputu ve tetikleyici butonu -->
+                    <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="uploadProfilePic(event)">
+                    <button onclick="document.getElementById('profilePicInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf</button>
+                    
+                    <button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('puanTab')"><i class="fa-solid fa-ranking-star"></i> Puan Durumu</button>
+                <button class="tab-btn" onclick="showTab('tahminTab')"><i class="fa-solid fa-pen-to-square"></i> Tahmin Yap</button>
+                <button class="tab-btn" onclick="showTab('sonucTab')"><i class="fa-solid fa-clipboard-check"></i> Gerçek Sonuçlar</button>
+            </div>
+        </div>
+
+        <div id="puanTab" class="section active glass-card">
             <table>
                 <thead>
                     <tr>
-                        <th style="text-align: left;">Sıra</th>
-                        <th style="text-align: left;">Mahlas</th>
-                        <th>Doğru Tahmin</th>
-                        <th>Puan</th>
+                        <th>#</th>
+                        <th style="text-align: left;">KATILIMCI</th>
+                        <th><i class="fa-solid fa-bullseye"></i> SONUÇLANAN TAHMİN<br><span style="font-size: 9px; font-weight: 400;">(DOĞRU 1 VEYA 2 TAHMİN)</span></th>
+                        <th><i class="fa-solid fa-star"></i> PUAN</th>
                     </tr>
                 </thead>
                 <tbody id="puanTablosuBody"></tbody>
             </table>
+        </div>
+
+        <div id="tahminTab" class="section glass-card">
+            <h3 style="text-align: center; margin-top: 0;">Tahmin Ekranı</h3>
+            <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">İlk maçlar tahmine açıktır. Diğer haftaların maçları maç gününe <b>son 1 hafta kala</b> açılır ve maç saatine son 5 dakika kala kilitlenir.</p>
+            <div id="tahminListesi"></div>
+            <button class="main-btn" onclick="kaydetTahminler()" style="margin-top: 25px;"><i class="fa-solid fa-cloud-arrow-up"></i> Tahminleri Kaydet</button>
+        </div>
+
+        <div id="sonucTab" class="section glass-card">
+            <h3 style="text-align: center; margin-top: 0;">Yönetici Paneli</h3>
+            <p style="font-size: 13px; color: #da3633; text-align: center; font-weight: 600; margin-bottom: 25px;">Oynanan maçların gerçek sonuçlarını buradan girin.</p>
+            <div id="sonucListesi"></div>
+            <button class="main-btn" onclick="kaydetGercekSonuclar()" style="margin-top: 25px; background: linear-gradient(135deg, #da3633, #a90432);"><i class="fa-solid fa-check-double"></i> Sonuçları Onayla</button>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, get, child, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCek7cnkUCo_VzRSlHii4Ek-rNcEfZyOyE",
@@ -112,31 +323,33 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const MAX_PLAYERS = 6;
     let currentUser = "";
-    
+    let currentUserId = ""; // Dosya isimleriyle (emrah, fatih vb.) eşleştirmek için
     let localData = { users: {}, gercekSonuclar: {} };
     
+    // Fotoğraf ID haritası (Kullanıcı isimlerini dosya isimlerine eşler)
+    const avatarMap = { 'Emrah':'emrah', 'Fatih':'fatih', 'Yiğit':'yigit', 'Soner':'soner', 'Sedat':'sedat', 'Yasin':'yasin' };
+
     const maclar = { 
         gs: [
-            "9 Eyl: Sporting CP (D)", 
-            "13 Eki: Barcelona (E)", 
-            "21 Eki: Lille (D)", 
-            "3 Kas: Stuttgart (E)", 
-            "24 Kas: Aston Villa (E)", 
-            "8 Ara: AEK (D)", 
-            "19 Oca: Feyenoord (E)", 
-            "27 Oca: PSG (D)"
+            { text: "Sporting CP (D)", date: "2026-09-09T22:00:00" },
+            { text: "Barcelona (E)", date: "2026-10-13T22:00:00" },
+            { text: "Lille (D)", date: "2026-10-21T22:00:00" },
+            { text: "Stuttgart (E)", date: "2026-11-03T22:00:00" },
+            { text: "Aston Villa (E)", date: "2026-11-24T22:00:00" },
+            { text: "AEK (D)", date: "2026-12-08T22:00:00" },
+            { text: "Feyenoord (E)", date: "2027-01-19T22:00:00" },
+            { text: "PSG (D)", date: "2027-01-27T22:00:00" }
         ], 
         fb: [
-            "10 Eyl: Roma (E)", 
-            "14 Eki: Aston Villa (D)", 
-            "20 Eki: Slavia Prag (E)", 
-            "4 Kas: Liverpool (E)", 
-            "25 Kas: Shakhtar (D)", 
-            "9 Ara: LASK (D)", 
-            "20 Oca: Villarreal (E)", 
-            "27 Oca: A. Madrid (D)"
+            { text: "Roma (E)", date: "2026-09-10T22:00:00" },
+            { text: "Aston Villa (D)", date: "2026-10-14T22:00:00" },
+            { text: "Slavia Prag (E)", date: "2026-10-20T22:00:00" },
+            { text: "Liverpool (E)", date: "2026-11-04T22:00:00" },
+            { text: "Shakhtar (D)", date: "2026-11-25T22:00:00" },
+            { text: "LASK (D)", date: "2026-12-09T22:00:00" },
+            { text: "Villarreal (E)", date: "2027-01-20T22:00:00" },
+            { text: "A. Madrid (D)", date: "2027-01-27T22:00:00" }
         ] 
     };
 
@@ -148,6 +361,15 @@
             localData.gercekSonuclar = data.gercekSonuclar || {};
             
             if(currentUser) {
+                // Üst bardaki avatarı yüklenen fotoğrafla güncelle
+                let myPic = (localData.users[currentUser] && localData.users[currentUser].profilePic) 
+                            ? localData.users[currentUser].profilePic 
+                            : `${currentUserId}.jpg`;
+                document.getElementById('headerAvatar').innerHTML = `
+                    <img src="${myPic}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <i class="fa-solid fa-user" style="display:none;"></i>
+                `;
+                
                 renderTahminArayuzu();
                 renderSonucArayuzu();
                 hesaplaVeRenderPuanDurumu();
@@ -162,26 +384,27 @@
         setTimeout(() => { notif.style.display = 'none'; }, 3000);
     }
 
-    window.login = async function() {
-        const usernameInput = document.getElementById('username').value.trim();
-        const errorDiv = document.getElementById('loginError');
-        if (!usernameInput) return errorDiv.innerText = "Mahlas girin.";
-
+    // Yeni Giriş Fonksiyonu (Parametre alır)
+    window.login = async function(isim, id) {
         const snapshot = await get(child(ref(db), `sl_tahmin_oyunu/users`));
         const currentUsers = snapshot.val() || {};
-        const userCount = Object.keys(currentUsers).length;
 
-        if (!currentUsers[usernameInput]) {
-            if (userCount >= MAX_PLAYERS) {
-                return errorDiv.innerText = "Kapasite dolu (6 kişi).";
-            }
-            await set(ref(db, `sl_tahmin_oyunu/users/${usernameInput}`), { gs_1: "" }); 
+        if (!currentUsers[isim]) {
+            await set(ref(db, `sl_tahmin_oyunu/users/${isim}`), { created: new Date().toISOString() }); 
         }
 
-        currentUser = usernameInput;
+        currentUser = isim;
+        currentUserId = id;
+
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('appContainer').style.display = 'block';
+        
+        // Üst bardaki avatar ve ismi güncelle
         document.getElementById('currentUserDisplay').innerText = currentUser;
+        document.getElementById('headerAvatar').innerHTML = `
+            <img src="${currentUserId}.jpg" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <i class="fa-solid fa-user" style="display:none;"></i>
+        `;
         
         renderTahminArayuzu();
         renderSonucArayuzu();
@@ -190,9 +413,17 @@
 
     window.logout = function() {
         currentUser = "";
+        currentUserId = "";
         document.getElementById('loginSection').style.display = 'block';
         document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('username').value = "";
+    };
+
+    window.silHesap = async function() {
+        if(confirm("Tüm verilerin ve tahminlerin silinecek. Emin misin?")) {
+            await remove(ref(db, `sl_tahmin_oyunu/users/${currentUser}`));
+            alert("Hesabın başarıyla silindi.");
+            logout();
+        }
     };
 
     window.showTab = function(tabId) {
@@ -203,23 +434,68 @@
         if(tabId === 'puanTab') hesaplaVeRenderPuanDurumu();
     };
 
-    function olusturMacSatirlari(takim, prefix, dataStore, isTahmin) {
-        let html = `<div class="team-title ${takim}-title">${takim.toUpperCase()} Fikstürü</div>`;
+    function olusturMacSatirlari(takim, dataStore, isTahmin) {
+        let html = `<div class="team-title ${takim}-title">${takim.toUpperCase()}</div>`;
+        const now = new Date();
+
         maclar[takim].forEach((mac, index) => {
             let key = `${takim}_${index+1}`;
             let selectedVal = dataStore[key] || '';
             let nameAttr = isTahmin ? `tahmin_${key}` : `sonuc_${key}`;
             
+            let matchDate = new Date(mac.date);
+            let minutesLeft = (matchDate - now) / (1000 * 60);
+            let daysLeft = minutesLeft / (60 * 24);
+            
+            let canPredict = true;
+            let lockHtml = "";
+            let disabledClass = "";
+            let disabledInput = "";
+
+            if (isTahmin) {
+                if (index === 0) { 
+                    // 1. Hafta: Asla kilitlenmez, her zaman açıktır.
+                    canPredict = true;
+                    lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
+                } else { 
+                    // 2-8. Haftalar: Son 1 hafta kala açılır, son 5 dk kala kilitlenir.
+                    if (daysLeft > 7) {
+                        canPredict = false;
+                        lockHtml = `<span class="lock-status" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> 1 Hafta Kala Açılır</span>`;
+                    } else if (minutesLeft <= 5) {
+                        canPredict = false;
+                        lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
+                    } else {
+                        lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
+                    }
+                }
+            }
+
+            if (!canPredict) {
+                disabledClass = "disabled";
+                disabledInput = "disabled";
+            }
+            
+            // Tarih ve saati Türkçe formatta ayarlıyoruz (Örn: 9 Eyl 2026, 22:00)
+            let formattedDate = matchDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
             html += `
             <div class="match-row">
-                <div class="match-info">
-                    <strong>${index+1}. Hafta Maçı</strong>
-                    <span>${mac}</span>
+                <div class="match-info-top">
+                    <div>
+                        <strong>${index+1}. Hafta Maçı</strong>
+                        <span class="team-name">${mac.text}</span>
+                        <!-- Maç Günü ve Saati -->
+                        <div style="font-size: 11.5px; color: #8bb4e5; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px;">
+                            <i class="fa-regular fa-clock" style="margin-right: 3px;"></i> ${formattedDate}
+                        </div>
+                    </div>
+                    ${lockHtml}
                 </div>
-                <div class="options">
-                    <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''}> <span>G</span></label>
-                    <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''}> <span>B</span></label>
-                    <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''}> <span>M</span></label>
+                <div class="options ${disabledClass}">
+                    <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''} ${disabledInput}> <span>G</span></label>
+                    <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''} ${disabledInput}> <span>B</span></label>
+                    <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''} ${disabledInput}> <span>M</span></label>
                 </div>
             </div>`;
         });
@@ -228,28 +504,39 @@
 
     function renderTahminArayuzu() {
         let userTahminler = localData.users[currentUser] || {};
-        document.getElementById('tahminListesi').innerHTML = 
-            olusturMacSatirlari('gs', 'tahmin', userTahminler, true) + 
-            olusturMacSatirlari('fb', 'tahmin', userTahminler, true);
+        document.getElementById('tahminListesi').innerHTML = `
+            <div class="fixtures-container">
+                <div class="fixture-column">${olusturMacSatirlari('gs', userTahminler, true)}</div>
+                <div class="fixture-column">${olusturMacSatirlari('fb', userTahminler, true)}</div>
+            </div>
+        `;
     }
 
     function renderSonucArayuzu() {
-        document.getElementById('sonucListesi').innerHTML = 
-            olusturMacSatirlari('gs', 'sonuc', localData.gercekSonuclar, false) + 
-            olusturMacSatirlari('fb', 'sonuc', localData.gercekSonuclar, false);
+        document.getElementById('sonucListesi').innerHTML = `
+            <div class="fixtures-container">
+                <div class="fixture-column">${olusturMacSatirlari('gs', localData.gercekSonuclar, false)}</div>
+                <div class="fixture-column">${olusturMacSatirlari('fb', localData.gercekSonuclar, false)}</div>
+            </div>
+        `;
     }
 
     window.kaydetTahminler = async function() {
-        let userTahminler = {};
+        let userTahminler = localData.users[currentUser] || {}; 
         ['gs', 'fb'].forEach(takim => {
             maclar[takim].forEach((mac, index) => {
                 let key = `${takim}_${index+1}`;
-                let selected = document.querySelector(`input[name="tahmin_${key}"]:checked`);
-                if (selected) userTahminler[key] = selected.value;
+                let radioGroup = document.getElementsByName(`tahmin_${key}`);
+                let isRadioDisabled = radioGroup.length > 0 && radioGroup[0].disabled;
+                
+                if (!isRadioDisabled) {
+                    let selected = document.querySelector(`input[name="tahmin_${key}"]:checked`);
+                    if (selected) userTahminler[key] = selected.value;
+                }
             });
         });
         await set(ref(db, `sl_tahmin_oyunu/users/${currentUser}`), userTahminler);
-        showNotification("Tahminlerin buluta kaydedildi!");
+        showNotification("Tahminlerin başarıyla kaydedildi!");
     };
 
     window.kaydetGercekSonuclar = async function() {
@@ -262,21 +549,29 @@
             });
         });
         await set(ref(db, `sl_tahmin_oyunu/gercekSonuclar`), gercekler);
-        showNotification("Gerçek sonuçlar güncellendi!");
+        showNotification("Gerçek sonuçlar başarıyla güncellendi!");
     };
 
     function hesaplaVeRenderPuanDurumu() {
         let puanlar = [];
-        let oynananMacSayisi = Object.keys(localData.gercekSonuclar).length;
-        
-        document.getElementById('oynananMacRozeti').innerText = `Değerlendirilen Maç: ${oynananMacSayisi} / 16`;
+        let bitenHaftalar = 0;
+        for (let i = 1; i <= 8; i++) {
+            if (localData.gercekSonuclar[`gs_${i}`] || localData.gercekSonuclar[`fb_${i}`]) bitenHaftalar++;
+        }
 
-        for (let user in localData.users) {
-            let dogruSayisi = 0; // Toplam kaç maçı doğru bildi
-            let toplamPuan = 0;  // Yeni kurallara göre hesaplanan puan
-            let tahminler = localData.users[user];
+        // Tasarımdaki tüm isimlerin tabloda çıkmasını sağlamak için mevcut db'yi de hesaba katalım.
+        // Eğer db boşsa bile önceden tanımlı isimleri listeye koyabiliriz ama şuan aktif oynayanları gösteriyoruz.
+        const knownUsers = ['Emrah', 'Fatih', 'Yiğit', 'Soner', 'Sedat', 'Yasin'];
+        
+        let displayUsers = Object.keys(localData.users);
+        // Henüz giriş yapmayan ama listede olması gerekenleri de ekleyelim
+        knownUsers.forEach(ku => { if(!displayUsers.includes(ku)) displayUsers.push(ku); });
+
+        displayUsers.forEach(user => {
+            let dogruSayisi = 0; 
+            let toplamPuan = 0; 
+            let tahminler = localData.users[user] || {};
             
-            // 8 Hafta üzerinden değerlendirme döngüsü
             for (let i = 1; i <= 8; i++) {
                 let gs_key = `gs_${i}`;
                 let fb_key = `fb_${i}`;
@@ -286,45 +581,77 @@
                 
                 let buHaftakiDogru = 0;
 
-                // O hafta GS maçının sonucu girilmişse ve doğru bilinmişse
-                if (gs_gercek && tahminler[gs_key] === gs_gercek) {
-                    buHaftakiDogru++;
-                    dogruSayisi++;
-                }
-                
-                // O hafta FB maçının sonucu girilmişse ve doğru bilinmişse
-                if (fb_gercek && tahminler[fb_key] === fb_gercek) {
-                    buHaftakiDogru++;
-                    dogruSayisi++;
-                }
+                if (gs_gercek && tahminler[gs_key] === gs_gercek) { buHaftakiDogru++; dogruSayisi++; }
+                if (fb_gercek && tahminler[fb_key] === fb_gercek) { buHaftakiDogru++; dogruSayisi++; }
 
-                // Yeni puanlama kuralı
-                if (buHaftakiDogru === 2) {
-                    toplamPuan += 3; // İkisini de bilene 3 puan
-                } else if (buHaftakiDogru === 1) {
-                    toplamPuan += 1; // Sadece 1 tane bilene 1 puan
-                }
-                // buHaftakiDogru 0 ise puan eklenmez
+                if (buHaftakiDogru === 2) { toplamPuan += 3; } 
+                else if (buHaftakiDogru === 1) { toplamPuan += 1; }
             }
-
             puanlar.push({ isim: user, dogru: dogruSayisi, puan: toplamPuan });
-        }
+        });
         
-        // Puanlara göre sırala (Eşitlik durumunda toplam doğru tahmin sayısına bakar)
         puanlar.sort((a, b) => b.puan !== a.puan ? b.puan - a.puan : b.dogru - a.dogru);
 
         let tbody = document.getElementById('puanTablosuBody');
         tbody.innerHTML = '';
         puanlar.forEach((p, index) => {
+            let uId = avatarMap[p.isim] || 'default';
+            // Eğer Firebase'de özel yüklenmiş fotoğraf varsa onu kullan, yoksa eski mantık uId.jpg kullan
+            let customPic = (localData.users[p.isim] && localData.users[p.isim].profilePic) 
+                            ? localData.users[p.isim].profilePic 
+                            : `${uId}.jpg`;
             tbody.innerHTML += `
             <tr>
-                <td style="text-align: left;">${index + 1}</td>
-                <td style="text-align: left;">${p.isim}</td>
-                <td>${p.dogru} / ${oynananMacSayisi}</td>
-                <td><strong style="color: var(--primary); font-size: 16px;">${p.puan}</strong></td>
+                <td class="rank-col">${index + 1}</td>
+                <td class="name-col">
+                    <div class="small-avatar">
+                        <img src="${customPic}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    </div>
+                    ${p.isim}
+                </td>
+                <td>${p.dogru} / ${bitenHaftalar * 2}</td>
+                <td class="score-col">${p.puan}</td>
             </tr>`;
         });
     }
+
+    // Fotoğraf yükleme ve küçültme (Base64) işlemi
+    window.uploadProfilePic = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Veritabanını şişirmemek için resmi max 150x150 piksele otomatik küçültüyoruz
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const maxDim = 150;
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > height) {
+                    if (width > maxDim) { height *= maxDim / width; width = maxDim; }
+                } else {
+                    if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Resmi metne (Base64) çevir ve Firebase'e ilgili kullanıcının düğümüne kaydet
+                const base64String = canvas.toDataURL('image/jpeg', 0.8); 
+                
+                set(ref(db, `sl_tahmin_oyunu/users/${currentUser}/profilePic`), base64String)
+                    .then(() => showNotification("Profil fotoğrafın başarıyla güncellendi!"))
+                    .catch(() => alert("Fotoğraf yüklenirken bir hata oluştu."));
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    };
 </script>
 
 </body>
