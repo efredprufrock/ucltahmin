@@ -201,6 +201,17 @@
         .badge-fb { background: var(--fb-color1); color: #fff; }
         .team-logo-wrapper { cursor: pointer; transition: 0.2s; display: inline-block; }
         .team-logo-wrapper:hover { transform: scale(1.15); filter: brightness(1.3); }
+        /* TÜM TAHMİNLER TABLOSU STİLLERİ */
+        .all-preds-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; overflow: hidden; }
+        .all-preds-table th { background: rgba(0, 163, 255, 0.1); font-size: 11px; padding: 12px 10px; border-bottom: 1px solid var(--glass-border); }
+        .all-preds-table td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .all-preds-table tr:last-child td { border-bottom: none; }
+        .all-preds-table tr:hover { background: rgba(0, 163, 255, 0.05); }
+        .pred-badge { display: inline-block; width: 32px; height: 32px; line-height: 32px; border-radius: 6px; font-weight: 800; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .pred-G { background: rgba(46, 160, 67, 0.2); color: #2ea043; border: 1px solid #2ea043; }
+        .pred-B { background: rgba(255, 152, 0, 0.2); color: #ff9800; border: 1px solid #ff9800; }
+        .pred-M { background: rgba(218, 54, 51, 0.2); color: #da3633; border: 1px solid #da3633; }
+        .pred-none { background: rgba(255, 255, 255, 0.05); color: #555; border: 1px dashed #555; font-weight: 400; }
     </style>
 </head>
 <body>
@@ -298,6 +309,8 @@
             <div class="tabs">
                 <button class="tab-btn active" onclick="showTab('puanTab')"><i class="fa-solid fa-ranking-star"></i> Puan Durumu</button>
                 <button class="tab-btn" onclick="showTab('tahminTab')"><i class="fa-solid fa-pen-to-square"></i> Tahmin Yap</button>
+                <!-- YENİ EKLENEN BUTON -->
+                <button class="tab-btn" onclick="showTab('tumTahminlerTab')"><i class="fa-solid fa-users-viewfinder"></i> Tüm Tahminler</button>
                 <button class="tab-btn" onclick="showTab('sonucTab')"><i class="fa-solid fa-clipboard-check"></i> Gerçek Sonuçlar</button>
             </div>
         </div>
@@ -316,11 +329,11 @@
             </table>
         </div>
 
-        <div id="tahminTab" class="section glass-card">
-            <h3 style="text-align: center; margin-top: 0;">Tahmin Ekranı</h3>
-            <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">İlk maçlar tahmine açıktır. Diğer haftaların maçları maç gününe <b>son 1 hafta kala</b> açılır ve maç saatine son 5 dakika kala kilitlenir.</p>
-            <div id="tahminListesi"></div>
-            
+        <!-- YENİ EKLENEN PANEL: TÜM TAHMİNLER -->
+        <div id="tumTahminlerTab" class="section glass-card">
+            <h3 style="text-align: center; margin-top: 0;">Herkesin Tahminleri</h3>
+            <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">Diğer oyuncuların haftalık tahminlerini buradan inceleyebilirsin.</p>
+            <div id="tumTahminlerListesi"></div>
         </div>
 
         <div id="sonucTab" class="section glass-card">
@@ -401,6 +414,7 @@
                 renderTahminArayuzu();
                 renderSonucArayuzu();
                 hesaplaVeRenderPuanDurumu();
+                renderTumTahminler(); // YENİ
             }
         }
     });
@@ -437,6 +451,7 @@
         renderTahminArayuzu();
         renderSonucArayuzu();
         hesaplaVeRenderPuanDurumu();
+        renderTumTahminler(); // YENİ
     };
 
     window.logout = function() {
@@ -597,6 +612,63 @@
         await set(ref(db, `sl_tahmin_oyunu/gercekSonuclar`), gercekler);
         showNotification("Gerçek sonuç buluta kaydedildi ✓");
     };
+
+    function renderTumTahminler() {
+        let html = '';
+        const knownUsers = ['Emrah', 'Fatih', 'Yiğit', 'Soner', 'Sedat', 'Yasin'];
+        let displayUsers = Object.keys(localData.users);
+        knownUsers.forEach(ku => { if(!displayUsers.includes(ku)) displayUsers.push(ku); });
+
+        for (let i = 0; i < 8; i++) {
+            html += `
+            <div class="week-card">
+                <h4 class="week-title">${i + 1}. HAFTA</h4>
+                <div style="overflow-x: auto;">
+                    <table class="all-preds-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; min-width: 120px;">KATILIMCI</th>
+                                <th><span class="takim-badge badge-gs" style="display:block; margin-bottom:4px;">GS</span> ${maclar.gs[i].text}</th>
+                                <th><span class="takim-badge badge-fb" style="display:block; margin-bottom:4px;">FB</span> ${maclar.fb[i].text}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            displayUsers.forEach(user => {
+                let tahminler = localData.users[user] || {};
+                let gsTahmin = tahminler[`gs_${i+1}`];
+                let fbTahmin = tahminler[`fb_${i+1}`];
+                
+                let gsBadge = gsTahmin ? `<span class="pred-badge pred-${gsTahmin}">${gsTahmin}</span>` : `<span class="pred-badge pred-none">?</span>`;
+                let fbBadge = fbTahmin ? `<span class="pred-badge pred-${fbTahmin}">${fbTahmin}</span>` : `<span class="pred-badge pred-none">?</span>`;
+                
+                let uId = avatarMap[user] || 'default';
+                let customPic = (localData.users[user] && localData.users[user].profilePic) ? localData.users[user].profilePic : `${uId}.jpg`;
+
+                html += `
+                            <tr>
+                                <td style="text-align: left; display: flex; align-items: center; gap: 12px; font-weight: 600;">
+                                    <div class="small-avatar" style="width: 32px; height: 32px;">
+                                        <img src="${customPic}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <i class="fa-solid fa-user" style="display:none; font-size: 16px;"></i>
+                                    </div>
+                                    ${user}
+                                </td>
+                                <td>${gsBadge}</td>
+                                <td>${fbBadge}</td>
+                            </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+        document.getElementById('tumTahminlerListesi').innerHTML = html;
+    }
 
     function hesaplaVeRenderPuanDurumu() {
         let puanlar = [];
