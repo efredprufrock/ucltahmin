@@ -176,6 +176,19 @@
             .top-header { flex-direction: column; gap: 15px; text-align: center; }
             .header-right { font-size: 32px; }
         }
+
+        /* HAFTA GÖRÜNÜMÜ VE LOGOLAR İÇİN EKLENEN STİLLER */
+        .week-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; margin-bottom: 25px; }
+        .week-title { text-align: center; color: var(--neon-blue); font-weight: 800; font-size: 16px; margin: 0 0 15px 0; letter-spacing: 1px; }
+        .week-matches { display: flex; gap: 20px; flex-wrap: wrap; }
+        .single-match-col { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .team-logo-img { width: 28px; height: 28px; object-fit: contain; margin-right: 8px; vertical-align: middle; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 3px; }
+        .team-name-wrapper { display: flex; align-items: center; margin-top: 8px;}
+        .takim-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: 800; margin-right: 8px; letter-spacing: 1px;}
+        .badge-gs { background: var(--gs-color1); color: #fff; }
+        .badge-fb { background: var(--fb-color1); color: #fff; }
+        .team-logo-wrapper { cursor: pointer; transition: 0.2s; display: inline-block; }
+        .team-logo-wrapper:hover { transform: scale(1.15); filter: brightness(1.3); }
     </style>
 </head>
 <body>
@@ -263,6 +276,7 @@
                 <div class="action-btns">
                     <!-- Gizli dosya yükleme inputu ve tetikleyici butonu -->
                     <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="uploadProfilePic(event)">
+                    <input type="file" id="teamLogoInput" accept="image/*" style="display: none;" onchange="handleTeamLogoUpload(event)">
                     <button onclick="document.getElementById('profilePicInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf</button>
                     
                     <button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
@@ -294,14 +308,14 @@
             <h3 style="text-align: center; margin-top: 0;">Tahmin Ekranı</h3>
             <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">İlk maçlar tahmine açıktır. Diğer haftaların maçları maç gününe <b>son 1 hafta kala</b> açılır ve maç saatine son 5 dakika kala kilitlenir.</p>
             <div id="tahminListesi"></div>
-            <button class="main-btn" onclick="kaydetTahminler()" style="margin-top: 25px;"><i class="fa-solid fa-cloud-arrow-up"></i> Tahminleri Kaydet</button>
+            
         </div>
 
         <div id="sonucTab" class="section glass-card">
             <h3 style="text-align: center; margin-top: 0;">Yönetici Paneli</h3>
             <p style="font-size: 13px; color: #da3633; text-align: center; font-weight: 600; margin-bottom: 25px;">Oynanan maçların gerçek sonuçlarını buradan girin.</p>
             <div id="sonucListesi"></div>
-            <button class="main-btn" onclick="kaydetGercekSonuclar()" style="margin-top: 25px; background: linear-gradient(135deg, #da3633, #a90432);"><i class="fa-solid fa-check-double"></i> Sonuçları Onayla</button>
+            
         </div>
     </div>
 </div>
@@ -325,31 +339,32 @@
 
     let currentUser = "";
     let currentUserId = ""; // Dosya isimleriyle (emrah, fatih vb.) eşleştirmek için
-    let localData = { users: {}, gercekSonuclar: {} };
+    let localData = { users: {}, gercekSonuclar: {}, teamLogos: {} };
     
     // Fotoğraf ID haritası (Kullanıcı isimlerini dosya isimlerine eşler)
     const avatarMap = { 'Emrah':'emrah', 'Fatih':'fatih', 'Yiğit':'yigit', 'Soner':'soner', 'Sedat':'sedat', 'Yasin':'yasin' };
 
+    // Maç Listesi, Saatleri ve Logoları
     const maclar = { 
         gs: [
-            { text: "Sporting CP (D)", date: "2026-09-09T22:00:00" },
-            { text: "Barcelona (E)", date: "2026-10-13T22:00:00" },
-            { text: "Lille (D)", date: "2026-10-21T22:00:00" },
-            { text: "Stuttgart (E)", date: "2026-11-03T22:00:00" },
-            { text: "Aston Villa (E)", date: "2026-11-24T22:00:00" },
-            { text: "AEK (D)", date: "2026-12-08T22:00:00" },
-            { text: "Feyenoord (E)", date: "2027-01-19T22:00:00" },
-            { text: "PSG (D)", date: "2027-01-27T22:00:00" }
+            { text: "Sporting CP (D)", date: "2026-09-09T22:00:00", logo: "sporting.png" },
+            { text: "Barcelona (E)", date: "2026-10-13T22:00:00", logo: "barcelona.png" },
+            { text: "Lille (D)", date: "2026-10-21T22:00:00", logo: "lille.png" },
+            { text: "Stuttgart (E)", date: "2026-11-03T22:00:00", logo: "stuttgart.png" },
+            { text: "Aston Villa (E)", date: "2026-11-24T22:00:00", logo: "astonvilla.png" },
+            { text: "AEK (D)", date: "2026-12-08T22:00:00", logo: "aek.png" },
+            { text: "Feyenoord (E)", date: "2027-01-19T22:00:00", logo: "feyenoord.png" },
+            { text: "PSG (D)", date: "2027-01-27T22:00:00", logo: "psg.png" }
         ], 
         fb: [
-            { text: "Roma (E)", date: "2026-09-10T22:00:00" },
-            { text: "Aston Villa (D)", date: "2026-10-14T22:00:00" },
-            { text: "Slavia Prag (E)", date: "2026-10-20T22:00:00" },
-            { text: "Liverpool (E)", date: "2026-11-04T22:00:00" },
-            { text: "Shakhtar (D)", date: "2026-11-25T22:00:00" },
-            { text: "LASK (D)", date: "2026-12-09T22:00:00" },
-            { text: "Villarreal (E)", date: "2027-01-20T22:00:00" },
-            { text: "A. Madrid (D)", date: "2027-01-27T22:00:00" }
+            { text: "Roma (E)", date: "2026-09-10T22:00:00", logo: "roma.png" },
+            { text: "Aston Villa (D)", date: "2026-10-14T22:00:00", logo: "astonvilla.png" },
+            { text: "Slavia Prag (E)", date: "2026-10-20T22:00:00", logo: "slaviaprag.png" },
+            { text: "Liverpool (E)", date: "2026-11-04T22:00:00", logo: "liverpool.png" },
+            { text: "Shakhtar (D)", date: "2026-11-25T22:00:00", logo: "shakhtar.png" },
+            { text: "LASK (D)", date: "2026-12-09T22:00:00", logo: "lask.png" },
+            { text: "Villarreal (E)", date: "2027-01-20T22:00:00", logo: "villarreal.png" },
+            { text: "A. Madrid (D)", date: "2027-01-27T22:00:00", logo: "atletico.png" }
         ] 
     };
 
@@ -359,6 +374,7 @@
         if (data) {
             localData.users = data.users || {};
             localData.gercekSonuclar = data.gercekSonuclar || {};
+            localData.teamLogos = data.teamLogos || {};
             
             if(currentUser) {
                 // Üst bardaki avatarı yüklenen fotoğrafla güncelle
@@ -434,91 +450,102 @@
         if(tabId === 'puanTab') hesaplaVeRenderPuanDurumu();
     };
 
-    function olusturMacSatirlari(takim, dataStore, isTahmin) {
-        let html = `<div class="team-title ${takim}-title">${takim.toUpperCase()}</div>`;
+    function olusturHaftaArayuzu(dataStore, isTahmin) {
+        let html = ``;
         const now = new Date();
 
-        maclar[takim].forEach((mac, index) => {
-            let key = `${takim}_${index+1}`;
-            let selectedVal = dataStore[key] || '';
-            let nameAttr = isTahmin ? `tahmin_${key}` : `sonuc_${key}`;
-            
-            let matchDate = new Date(mac.date);
-            let minutesLeft = (matchDate - now) / (1000 * 60);
-            let daysLeft = minutesLeft / (60 * 24);
-            
-            let canPredict = true;
-            let lockHtml = "";
-            let disabledClass = "";
-            let disabledInput = "";
-
-            if (isTahmin) {
-                if (index === 0) { 
-                    // 1. Hafta: Asla kilitlenmez, her zaman açıktır.
-                    canPredict = true;
-                    lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
-                } else { 
-                    // 2-8. Haftalar: Son 1 hafta kala açılır, son 5 dk kala kilitlenir.
-                    if (daysLeft > 7) {
-                        canPredict = false;
-                        lockHtml = `<span class="lock-status" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> 1 Hafta Kala Açılır</span>`;
-                    } else if (minutesLeft <= 5) {
-                        canPredict = false;
-                        lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
-                    } else {
-                        lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
-                    }
-                }
-            }
-
-            if (!canPredict) {
-                disabledClass = "disabled";
-                disabledInput = "disabled";
-            }
-            
-            // Tarih ve saati Türkçe formatta ayarlıyoruz (Örn: 9 Eyl 2026, 22:00)
-            let formattedDate = matchDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
+        // 8 Hafta üzerinden döngü
+        for (let i = 0; i < 8; i++) {
             html += `
-            <div class="match-row">
-                <div class="match-info-top">
-                    <div>
-                        <strong>${index+1}. Hafta Maçı</strong>
-                        <span class="team-name">${mac.text}</span>
-                        <!-- Maç Günü ve Saati -->
-                        <div style="font-size: 11.5px; color: #8bb4e5; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px;">
-                            <i class="fa-regular fa-clock" style="margin-right: 3px;"></i> ${formattedDate}
-                        </div>
-                    </div>
-                    ${lockHtml}
-                </div>
-                <div class="options ${disabledClass}">
-                    <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''} ${disabledInput}> <span>G</span></label>
-                    <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''} ${disabledInput}> <span>B</span></label>
-                    <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''} ${disabledInput}> <span>M</span></label>
+            <div class="week-card">
+                <h4 class="week-title">${i + 1}. HAFTA</h4>
+                <div class="week-matches">
+                    ${olusturTekMac('gs', i, maclar.gs[i], dataStore, isTahmin, now)}
+                    ${olusturTekMac('fb', i, maclar.fb[i], dataStore, isTahmin, now)}
                 </div>
             </div>`;
-        });
+        }
         return html;
+    }
+
+    function olusturTekMac(takim, index, mac, dataStore, isTahmin, now) {
+        let key = `${takim}_${index+1}`;
+        let selectedVal = dataStore[key] || '';
+        let nameAttr = isTahmin ? `tahmin_${key}` : `sonuc_${key}`;
+        
+        let matchDate = new Date(mac.date);
+        let minutesLeft = (matchDate - now) / (1000 * 60);
+        let daysLeft = minutesLeft / (60 * 24);
+        
+        let canPredict = true;
+        let lockHtml = "";
+        let disabledClass = "";
+        let disabledInput = "";
+
+        if (isTahmin) {
+            if (index === 0) { // 1. Hafta (Her zaman açık)
+                canPredict = true;
+                lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
+            } else { // 2-8. Haftalar (1 Hf kala açılır, son 5 dk kapanır)
+                if (daysLeft > 7) {
+                    canPredict = false;
+                    lockHtml = `<span class="lock-status" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> 1 Hf Kala</span>`;
+                } else if (minutesLeft <= 5) {
+                    canPredict = false;
+                    lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
+                } else {
+                    lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
+                }
+            }
+        }
+
+        if (!canPredict) {
+            disabledClass = "disabled";
+            disabledInput = "disabled";
+        }
+        
+        let formattedDate = matchDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        let takimBadge = takim === 'gs' ? '<span class="takim-badge badge-gs">GALATASARAY</span>' : '<span class="takim-badge badge-fb">FENERBAHÇE</span>';
+        
+        // YENİ: Hangi ekranda (Tahmin veya Gerçek Sonuç) olduğumuza göre tetiklenecek fonksiyonu belirliyoruz
+        let onChangeFn = isTahmin ? 'kaydetTahminler()' : 'kaydetGercekSonuclar()';
+        
+        return `
+        <div class="single-match-col">
+            <div class="match-info-top" style="align-items: flex-start;">
+                <div>
+                    ${takimBadge}
+                    <div style="font-size: 11px; color: #8bb4e5; margin-top: 5px; font-weight: 600;">
+                        <i class="fa-regular fa-clock"></i> ${formattedDate}
+                    </div>
+                    <div class="team-name-wrapper">
+                        <!-- Tıklanabilir Logo Alanı -->
+                        <div class="team-logo-wrapper" onclick="triggerLogoUpload('${key}')" title="Yeni Logo Yükle">
+                            <img src="${(localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo}" class="team-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                            <i class="fa-solid fa-shield-halved team-logo-img" style="display:none; text-align:center; line-height:22px; color:#8bb4e5;"></i>
+                        </div>
+                        
+                        <span class="team-name" style="font-size: 15px; font-weight: 600; color: #fff;">${mac.text}</span>
+                    </div>
+                </div>
+                ${lockHtml}
+            </div>
+            <div class="options ${disabledClass}" style="margin-top: 15px;">
+                <!-- onchange özelliğini belirlediğimiz değişkene bağladık -->
+                <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>G</span></label>
+                <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>B</span></label>
+                <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>M</span></label>
+            </div>
+        </div>`;
     }
 
     function renderTahminArayuzu() {
         let userTahminler = localData.users[currentUser] || {};
-        document.getElementById('tahminListesi').innerHTML = `
-            <div class="fixtures-container">
-                <div class="fixture-column">${olusturMacSatirlari('gs', userTahminler, true)}</div>
-                <div class="fixture-column">${olusturMacSatirlari('fb', userTahminler, true)}</div>
-            </div>
-        `;
+        document.getElementById('tahminListesi').innerHTML = olusturHaftaArayuzu(userTahminler, true);
     }
 
     function renderSonucArayuzu() {
-        document.getElementById('sonucListesi').innerHTML = `
-            <div class="fixtures-container">
-                <div class="fixture-column">${olusturMacSatirlari('gs', localData.gercekSonuclar, false)}</div>
-                <div class="fixture-column">${olusturMacSatirlari('fb', localData.gercekSonuclar, false)}</div>
-            </div>
-        `;
+        document.getElementById('sonucListesi').innerHTML = olusturHaftaArayuzu(localData.gercekSonuclar, false);
     }
 
     window.kaydetTahminler = async function() {
@@ -536,7 +563,7 @@
             });
         });
         await set(ref(db, `sl_tahmin_oyunu/users/${currentUser}`), userTahminler);
-        showNotification("Tahminlerin başarıyla kaydedildi!");
+        showNotification("Seçim buluta kaydedildi ✓");
     };
 
     window.kaydetGercekSonuclar = async function() {
@@ -549,7 +576,7 @@
             });
         });
         await set(ref(db, `sl_tahmin_oyunu/gercekSonuclar`), gercekler);
-        showNotification("Gerçek sonuçlar başarıyla güncellendi!");
+        showNotification("Gerçek sonuç buluta kaydedildi ✓");
     };
 
     function hesaplaVeRenderPuanDurumu() {
@@ -647,6 +674,52 @@
                 set(ref(db, `sl_tahmin_oyunu/users/${currentUser}/profilePic`), base64String)
                     .then(() => showNotification("Profil fotoğrafın başarıyla güncellendi!"))
                     .catch(() => alert("Fotoğraf yüklenirken bir hata oluştu."));
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    };
+
+    // --- TAKIM LOGOSU YÜKLEME ---
+    let currentUploadKey = "";
+    
+    window.triggerLogoUpload = function(key) {
+        currentUploadKey = key;
+        document.getElementById('teamLogoInput').click();
+    };
+
+    window.handleTeamLogoUpload = function(event) {
+        const file = event.target.files[0];
+        if (!file || !currentUploadKey) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Logoyu küçük tutmak için 100x100 boyutuna orantılı sıkıştırıyoruz
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const maxDim = 100; 
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > height) {
+                    if (width > maxDim) { height *= maxDim / width; width = maxDim; }
+                } else {
+                    if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const base64String = canvas.toDataURL('image/png', 0.9); 
+                
+                // Firebase'e kaydet
+                set(ref(db, `sl_tahmin_oyunu/teamLogos/${currentUploadKey}`), base64String)
+                    .then(() => showNotification("Takım logosu başarıyla güncellendi!"))
+                    .catch(() => alert("Logo yüklenirken bir hata oluştu."));
+                
+                document.getElementById('teamLogoInput').value = ""; // Inputu sıfırla
             }
             img.src = e.target.result;
         }
