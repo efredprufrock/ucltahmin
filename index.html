@@ -165,8 +165,20 @@
         }
         .options label:hover { background: rgba(0, 163, 255, 0.2); border-color: var(--neon-blue); }
         .options input { display: none; }
-        .options input:checked + span { color: var(--neon-blue); font-size: 14px; }
-        .options input:checked + span::before { content: "✓ "; }
+        /* Tik işaretini kaldırdık, yazıyı biraz kalınlaştırdık */
+        .options input:checked + span { font-size: 15px; font-weight: 800; text-shadow: 0 0 10px currentColor; }
+
+        /* G (Galibiyet) Seçildiğinde - Yeşil */
+        .options label:has(input[value="G"]:checked) { border-color: #2ea043; background: rgba(46, 160, 67, 0.2); }
+        .options input[value="G"]:checked + span { color: #2ea043; }
+
+        /* B (Beraberlik) Seçildiğinde - Turuncu */
+        .options label:has(input[value="B"]:checked) { border-color: #ff9800; background: rgba(255, 152, 0, 0.2); }
+        .options input[value="B"]:checked + span { color: #ff9800; }
+
+        /* M (Mağlubiyet) Seçildiğinde - Kırmızı */
+        .options label:has(input[value="M"]:checked) { border-color: #da3633; background: rgba(218, 54, 51, 0.2); }
+        .options input[value="M"]:checked + span { color: #da3633; }
         .options.disabled label { opacity: 0.3; cursor: not-allowed; }
 
         .notification { background: #2ea043; color: white; text-align: center; padding: 12px; border-radius: 8px; display: none; margin-bottom: 20px; font-weight: 600; }
@@ -182,7 +194,7 @@
         .week-title { text-align: center; color: var(--neon-blue); font-weight: 800; font-size: 16px; margin: 0 0 15px 0; letter-spacing: 1px; }
         .week-matches { display: flex; gap: 20px; flex-wrap: wrap; }
         .single-match-col { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-        .team-logo-img { width: 28px; height: 28px; object-fit: contain; margin-right: 8px; vertical-align: middle; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 3px; }
+        .team-logo-img { width: 56px; height: 56px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .team-name-wrapper { display: flex; align-items: center; margin-top: 8px;}
         .takim-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: 800; margin-right: 8px; letter-spacing: 1px;}
         .badge-gs { background: var(--gs-color1); color: #fff; }
@@ -512,29 +524,34 @@
         
         return `
         <div class="single-match-col">
-            <div class="match-info-top" style="align-items: flex-start;">
+            <!-- ÜST KISIM: Takım, Tarih ve Rakip İsim -->
+            <div class="match-info-top" style="align-items: flex-start; margin-bottom: 15px;">
                 <div>
                     ${takimBadge}
                     <div style="font-size: 11px; color: #8bb4e5; margin-top: 5px; font-weight: 600;">
                         <i class="fa-regular fa-clock"></i> ${formattedDate}
                     </div>
-                    <div class="team-name-wrapper">
-                        <!-- Tıklanabilir Logo Alanı -->
-                        <div class="team-logo-wrapper" onclick="triggerLogoUpload('${key}')" title="Yeni Logo Yükle">
-                            <img src="${(localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo}" class="team-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                            <i class="fa-solid fa-shield-halved team-logo-img" style="display:none; text-align:center; line-height:22px; color:#8bb4e5;"></i>
-                        </div>
-                        
-                        <span class="team-name" style="font-size: 15px; font-weight: 600; color: #fff;">${mac.text}</span>
+                    <div class="team-name-wrapper" style="margin-top: 8px;">
+                        <span class="team-name" style="font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">${mac.text}</span>
                     </div>
                 </div>
                 ${lockHtml}
             </div>
-            <div class="options ${disabledClass}" style="margin-top: 15px;">
-                <!-- onchange özelliğini belirlediğimiz değişkene bağladık -->
-                <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>G</span></label>
-                <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>B</span></label>
-                <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>M</span></label>
+            
+            <!-- ALT KISIM: Logo Sola, Butonlar Sağa (Yan Yana) -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- Büyük Logo Alanı -->
+                <div class="team-logo-wrapper" onclick="triggerLogoUpload('${key}')" title="Yeni Logo Yükle" style="flex-shrink: 0;">
+                    <img src="${(localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo}" class="team-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                    <i class="fa-solid fa-shield-halved team-logo-img" style="display:none; text-align:center; line-height:46px; font-size:24px; color:#8bb4e5;"></i>
+                </div>
+                
+                <!-- Tahmin Butonları -->
+                <div class="options ${disabledClass}" style="flex: 1; width: 100%;">
+                    <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>G</span></label>
+                    <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>B</span></label>
+                    <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>M</span></label>
+                </div>
             </div>
         </div>`;
     }
