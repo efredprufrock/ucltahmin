@@ -21,19 +21,23 @@
         input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #555; background: #222; color: white; }
         button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
         button:hover { opacity: 0.9; }
-        .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #444; }
+        .match-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #444; }
         .match-row:last-child { border-bottom: none; }
+        .match-info { flex: 1; padding-right: 10px; }
+        .match-info strong { font-size: 14px; display: block; margin-bottom: 3px; }
+        .match-info span { font-size: 13px; color: #ccc; }
         .team-title { padding: 10px; border-radius: 5px; margin-top: 20px; font-weight: bold; text-align: center; }
         .gs-title { background: linear-gradient(90deg, var(--gs-color1) 50%, var(--gs-color2) 50%); color: white; text-shadow: 1px 1px 2px black; }
         .fb-title { background: linear-gradient(90deg, var(--fb-color1) 50%, var(--fb-color2) 50%); color: white; text-shadow: 1px 1px 2px black; }
-        .options { display: flex; gap: 10px; }
-        .options label { cursor: pointer; padding: 5px 10px; background: #333; border-radius: 3px; font-size: 14px; }
+        .options { display: flex; gap: 5px; }
+        .options label { cursor: pointer; padding: 6px 10px; background: #333; border-radius: 3px; font-size: 14px; text-align: center; min-width: 30px; }
         .options input:checked + span { color: var(--primary); font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
-        th { background-color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #444; }
+        th { background-color: #333; font-size: 14px; }
         .logout-btn { background-color: #d32f2f; margin-top: 10px; }
         .notification { background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 5px; display: none; margin-bottom: 15px; }
+        .status-badge { display: inline-block; background-color: #555; padding: 5px 10px; border-radius: 15px; font-size: 12px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -66,15 +70,24 @@
 
         <div id="sonucTab" class="section">
             <h2>Haftanın Gerçek Sonuçları</h2>
+            <p style="font-size: 13px; color: #aaa; text-align: center;">Maçlar oynandıkça sonuçları işaretleyip kaydedin. Tablo hafta hafta güncellenecektir.</p>
             <div id="sonucListesi"></div>
             <button onclick="kaydetGercekSonuclar()" style="margin-top: 20px;">Sonuçları Buluta Kaydet</button>
         </div>
 
         <div id="puanTab" class="section">
-            <h2>Canlı Puan Durumu</h2>
+            <div style="text-align: center;">
+                <h2>Canlı Puan Durumu</h2>
+                <div class="status-badge" id="oynananMacRozeti">Değerlendirilen Maç: 0 / 16</div>
+            </div>
             <table>
                 <thead>
-                    <tr><th>Sıra</th><th>Mahlas</th><th>Doğru</th><th>Puan</th></tr>
+                    <tr>
+                        <th style="text-align: left;">Sıra</th>
+                        <th style="text-align: left;">Mahlas</th>
+                        <th>Doğru Tahmin</th>
+                        <th>Puan</th>
+                    </tr>
                 </thead>
                 <tbody id="puanTablosuBody"></tbody>
             </table>
@@ -86,11 +99,10 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // Senin Firebase Ayarların
     const firebaseConfig = {
       apiKey: "AIzaSyCek7cnkUCo_VzRSlHii4Ek-rNcEfZyOyE",
       authDomain: "tahmin-erkek.firebaseapp.com",
-      databaseURL: "https://tahmin-erkek-default-rtdb.europe-west1.firebasedatabase.app", // Veritabanı linkin eklendi
+      databaseURL: "https://tahmin-erkek-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "tahmin-erkek",
       storageBucket: "tahmin-erkek.firebasestorage.app",
       messagingSenderId: "709108300332",
@@ -103,11 +115,31 @@
     const MAX_PLAYERS = 6;
     let currentUser = "";
     
-    // Uygulama State'i
     let localData = { users: {}, gercekSonuclar: {} };
-    const maclar = { gs: ["1. Maç", "2. Maç", "3. Maç", "4. Maç", "5. Maç", "6. Maç", "7. Maç", "8. Maç"], fb: ["1. Maç", "2. Maç", "3. Maç", "4. Maç", "5. Maç", "6. Maç", "7. Maç", "8. Maç"] };
+    
+    const maclar = { 
+        gs: [
+            "9 Eyl: Sporting CP (D)", 
+            "13 Eki: Barcelona (E)", 
+            "21 Eki: Lille (D)", 
+            "3 Kas: Stuttgart (E)", 
+            "24 Kas: Aston Villa (E)", 
+            "8 Ara: AEK (D)", 
+            "19 Oca: Feyenoord (E)", 
+            "27 Oca: PSG (D)"
+        ], 
+        fb: [
+            "10 Eyl: Roma (E)", 
+            "14 Eki: Aston Villa (D)", 
+            "20 Eki: Slavia Prag (E)", 
+            "4 Kas: Liverpool (E)", 
+            "25 Kas: Shakhtar (D)", 
+            "9 Ara: LASK (D)", 
+            "20 Oca: Villarreal (E)", 
+            "27 Oca: A. Madrid (D)"
+        ] 
+    };
 
-    // Realtime Database Dinleyici
     const dbRef = ref(db, 'sl_tahmin_oyunu');
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
@@ -119,7 +151,6 @@
                 renderTahminArayuzu();
                 renderSonucArayuzu();
                 hesaplaVeRenderPuanDurumu();
-                showNotification("Veriler buluttan güncellendi!");
             }
         }
     });
@@ -173,14 +204,18 @@
     };
 
     function olusturMacSatirlari(takim, prefix, dataStore, isTahmin) {
-        let html = `<div class="team-title ${takim}-title">${takim.toUpperCase()}</div>`;
+        let html = `<div class="team-title ${takim}-title">${takim.toUpperCase()} Fikstürü</div>`;
         maclar[takim].forEach((mac, index) => {
             let key = `${takim}_${index+1}`;
             let selectedVal = dataStore[key] || '';
             let nameAttr = isTahmin ? `tahmin_${key}` : `sonuc_${key}`;
+            
             html += `
             <div class="match-row">
-                <span>${mac}</span>
+                <div class="match-info">
+                    <strong>${index+1}. Hafta Maçı</strong>
+                    <span>${mac}</span>
+                </div>
                 <div class="options">
                     <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''}> <span>G</span></label>
                     <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''}> <span>B</span></label>
@@ -227,27 +262,67 @@
             });
         });
         await set(ref(db, `sl_tahmin_oyunu/gercekSonuclar`), gercekler);
-        showNotification("Gerçek sonuçlar buluta kaydedildi!");
+        showNotification("Gerçek sonuçlar güncellendi!");
     };
 
     function hesaplaVeRenderPuanDurumu() {
         let puanlar = [];
+        let oynananMacSayisi = Object.keys(localData.gercekSonuclar).length;
+        
+        document.getElementById('oynananMacRozeti').innerText = `Değerlendirilen Maç: ${oynananMacSayisi} / 16`;
+
         for (let user in localData.users) {
-            let dogruSayisi = 0;
+            let dogruSayisi = 0; // Toplam kaç maçı doğru bildi
+            let toplamPuan = 0;  // Yeni kurallara göre hesaplanan puan
             let tahminler = localData.users[user];
-            for (let matchKey in localData.gercekSonuclar) {
-                if (tahminler[matchKey] && tahminler[matchKey] === localData.gercekSonuclar[matchKey]) {
+            
+            // 8 Hafta üzerinden değerlendirme döngüsü
+            for (let i = 1; i <= 8; i++) {
+                let gs_key = `gs_${i}`;
+                let fb_key = `fb_${i}`;
+                
+                let gs_gercek = localData.gercekSonuclar[gs_key];
+                let fb_gercek = localData.gercekSonuclar[fb_key];
+                
+                let buHaftakiDogru = 0;
+
+                // O hafta GS maçının sonucu girilmişse ve doğru bilinmişse
+                if (gs_gercek && tahminler[gs_key] === gs_gercek) {
+                    buHaftakiDogru++;
                     dogruSayisi++;
                 }
+                
+                // O hafta FB maçının sonucu girilmişse ve doğru bilinmişse
+                if (fb_gercek && tahminler[fb_key] === fb_gercek) {
+                    buHaftakiDogru++;
+                    dogruSayisi++;
+                }
+
+                // Yeni puanlama kuralı
+                if (buHaftakiDogru === 2) {
+                    toplamPuan += 3; // İkisini de bilene 3 puan
+                } else if (buHaftakiDogru === 1) {
+                    toplamPuan += 1; // Sadece 1 tane bilene 1 puan
+                }
+                // buHaftakiDogru 0 ise puan eklenmez
             }
-            puanlar.push({ isim: user, dogru: dogruSayisi, puan: dogruSayisi * 3 });
+
+            puanlar.push({ isim: user, dogru: dogruSayisi, puan: toplamPuan });
         }
-        puanlar.sort((a, b) => b.puan - a.puan);
+        
+        // Puanlara göre sırala (Eşitlik durumunda toplam doğru tahmin sayısına bakar)
+        puanlar.sort((a, b) => b.puan !== a.puan ? b.puan - a.puan : b.dogru - a.dogru);
 
         let tbody = document.getElementById('puanTablosuBody');
         tbody.innerHTML = '';
         puanlar.forEach((p, index) => {
-            tbody.innerHTML += `<tr><td>${index + 1}</td><td>${p.isim}</td><td>${p.dogru} / 16</td><td><strong>${p.puan}</strong></td></tr>`;
+            tbody.innerHTML += `
+            <tr>
+                <td style="text-align: left;">${index + 1}</td>
+                <td style="text-align: left;">${p.isim}</td>
+                <td>${p.dogru} / ${oynananMacSayisi}</td>
+                <td><strong style="color: var(--primary); font-size: 16px;">${p.puan}</strong></td>
+            </tr>`;
         });
     }
 </script>
