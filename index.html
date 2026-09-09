@@ -500,9 +500,11 @@
                 lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
             } else { // 2-8. Haftalar (1 Hf kala açılır, son 5 dk kapanır)
                 if (daysLeft > 7) {
-                    canPredict = false;
-                    lockHtml = `<span class="lock-status" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> 1 Hf Kala</span>`;
-                } else if (minutesLeft <= 5) {
+                        canPredict = false;
+                        // Panel açılış zamanını (maçtan tam 7 gün öncesini) hesaplayıp HTML'e veri olarak gömüyoruz
+                        let openDateMs = matchDate.getTime() - (7 * 24 * 60 * 60 * 1000);
+                        lockHtml = `<span class="lock-status countdown-timer" data-target="${openDateMs}" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> <span class="timer-text">Hesaplanıyor...</span></span>`;
+                    } else if (minutesLeft <= 5) {
                     canPredict = false;
                     lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
                 } else {
@@ -742,6 +744,36 @@
         }
         reader.readAsDataURL(file);
     };
+
+    // --- CANLI GERİ SAYIM (COUNTDOWN) MOTORU ---
+    setInterval(() => {
+        const timers = document.querySelectorAll('.countdown-timer');
+        const now = new Date().getTime();
+
+        timers.forEach(timer => {
+            const target = parseInt(timer.getAttribute('data-target'));
+            const distance = target - now;
+
+            if (distance < 0) {
+                // Süre dolduğunda tahmin panelinin açılması için uyarı ver
+                timer.innerHTML = `<i class="fa-solid fa-rotate"></i> Açıldı (Yenile)`;
+                timer.style.color = "#2ea043";
+                timer.classList.remove('countdown-timer'); // Daha fazla hesaplama yapmasını durdur
+            } else {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                let text = "";
+                if (days > 0) text += `${days}g `;
+                text += `${hours}sa ${minutes}dk ${seconds}sn`;
+                
+                const textEl = timer.querySelector('.timer-text');
+                if(textEl) textEl.innerText = text;
+            }
+        });
+    }, 1000); // Her 1 saniyede (1000ms) bir günceller
 </script>
 
 </body>
