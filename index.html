@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ŞL Tahmin Ligi: GS & FB</title>
+    <style>
+        :root {
+            --bg-color: #121212; --text-color: #f1f1f1; --primary: #4CAF50;
+            --gs-color1: #a90432; --gs-color2: #fdb912; --fb-color1: #001e60; --fb-color2: #edee00;
+            --card-bg: #1e1e1e;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        h1, h2, h3 { text-align: center; }
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
+        .tab-btn { background-color: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .tab-btn.active { background-color: var(--primary); }
+        .section { display: none; background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .section.active { display: block; }
+        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #555; background: #222; color: white; }
+        button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
+        button:hover { opacity: 0.9; }
+        .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #444; }
+        .match-row:last-child { border-bottom: none; }
+        .team-title { padding: 10px; border-radius: 5px; margin-top: 20px; font-weight: bold; text-align: center; }
+        .gs-title { background: linear-gradient(90deg, var(--gs-color1) 50%, var(--gs-color2) 50%); color: white; text-shadow: 1px 1px 2px black; }
+        .fb-title { background: linear-gradient(90deg, var(--fb-color1) 50%, var(--fb-color2) 50%); color: white; text-shadow: 1px 1px 2px black; }
+        .options { display: flex; gap: 10px; }
+        .options label { cursor: pointer; padding: 5px 10px; background: #333; border-radius: 3px; font-size: 14px; }
+        .options input:checked + span { color: var(--primary); font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
+        th { background-color: #333; }
+        .logout-btn { background-color: #d32f2f; margin-top: 10px; }
+        .notification { background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 5px; display: none; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏆 ŞL Tahmin Ligi</h1>
+    <div id="notification" class="notification">Veriler güncellendi!</div>
+    
+    <div id="loginSection" class="section active">
+        <h2>Giriş Yap</h2>
+        <p>En fazla 6 kişi katılabilir.</p>
+        <input type="text" id="username" placeholder="Mahlasınız (Örn: Maestro)">
+        <button onclick="login()">Giriş</button>
+        <div id="loginError" style="color: #ff5252; margin-top: 10px; text-align: center;"></div>
+    </div>
+
+    <div id="appContainer" style="display: none;">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('tahminTab')">Tahmin Yap</button>
+            <button class="tab-btn" onclick="showTab('sonucTab')">Gerçek Sonuçlar</button>
+            <button class="tab-btn" onclick="showTab('puanTab')">Puan Durumu</button>
+        </div>
+        <p style="text-align: center;">Kullanıcı: <b id="currentUserDisplay"></b> <button class="logout-btn" style="width: auto; padding: 5px 10px; font-size: 12px;" onclick="logout()">Çıkış</button></p>
+
+        <div id="tahminTab" class="section active">
+            <h2>Tahminlerin</h2>
+            <div id="tahminListesi"></div>
+            <button onclick="kaydetTahminler()" style="margin-top: 20px;">Tahminleri Buluta Kaydet</button>
+        </div>
+
+        <div id="sonucTab" class="section">
+            <h2>Haftanın Gerçek Sonuçları</h2>
+            <div id="sonucListesi"></div>
+            <button onclick="kaydetGercekSonuclar()" style="margin-top: 20px;">Sonuçları Buluta Kaydet</button>
+        </div>
+
+        <div id="puanTab" class="section">
+            <h2>Canlı Puan Durumu</h2>
+            <table>
+                <thead>
+                    <tr><th>Sıra</th><th>Mahlas</th><th>Doğru</th><th>Puan</th></tr>
+                </thead>
+                <tbody id="puanTablosuBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Senin Firebase Ayarların
+    const firebaseConfig = {
+      apiKey: "AIzaSyCek7cnkUCo_VzRSlHii4Ek-rNcEfZyOyE",
+      authDomain: "tahmin-erkek.firebaseapp.com",
+      databaseURL: "https://tahmin-erkek-default-rtdb.europe-west1.firebasedatabase.app", // Veritabanı linkin eklendi
+      projectId: "tahmin-erkek",
+      storageBucket: "tahmin-erkek.firebasestorage.app",
+      messagingSenderId: "709108300332",
+      appId: "1:709108300332:web:2ecd95568e88d937a76f89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const MAX_PLAYERS = 6;
+    let currentUser = "";
+    
+    // Uygulama State'i
+    let localData = { users: {}, gercekSonuclar: {} };
+    const maclar = { gs: ["1. Maç", "2. Maç", "3. Maç", "4. Maç", "5. Maç", "6. Maç", "7. Maç", "8. Maç"], fb: ["1. Maç", "2. Maç", "3. Maç", "4. Maç", "5. Maç", "6. Maç", "7. Maç", "8. Maç"] };
+
+    // Realtime Database Dinleyici
+    const dbRef = ref(db, 'sl_tahmin_oyunu');
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            localData.users = data.users || {};
+            localData.gercekSonuclar = data.gercekSonuclar || {};
+            
+            if(currentUser) {
+                renderTahminArayuzu();
+                renderSonucArayuzu();
+                hesaplaVeRenderPuanDurumu();
+                showNotification("Veriler buluttan güncellendi!");
+            }
+        }
+    });
+
+    function showNotification(msg) {
+        const notif = document.getElementById('notification');
+        notif.innerText = msg;
+        notif.style.display = 'block';
+        setTimeout(() => { notif.style.display = 'none'; }, 3000);
+    }
+
+    window.login = async function() {
+        const usernameInput = document.getElementById('username').value.trim();
+        const errorDiv = document.getElementById('loginError');
+        if (!usernameInput) return errorDiv.innerText = "Mahlas girin.";
+
+        const snapshot = await get(child(ref(db), `sl_tahmin_oyunu/users`));
+        const currentUsers = snapshot.val() || {};
+        const userCount = Object.keys(currentUsers).length;
+
+        if (!currentUsers[usernameInput]) {
+            if (userCount >= MAX_PLAYERS) {
+                return errorDiv.innerText = "Kapasite dolu (6 kişi).";
+            }
+            await set(ref(db, `sl_tahmin_oyunu/users/${usernameInput}`), { gs_1: "" }); 
+        }
+
+        currentUser = usernameInput;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('currentUserDisplay').innerText = currentUser;
+        
+        renderTahminArayuzu();
+        renderSonucArayuzu();
+        hesaplaVeRenderPuanDurumu();
+    };
+
+    window.logout = function() {
+        currentUser = "";
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('username').value = "";
+    };
+
+    window.showTab = function(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        if(tabId === 'puanTab') hesaplaVeRenderPuanDurumu();
+    };
+
+    function olusturMacSatirlari(takim, prefix, dataStore, isTahmin) {
+        let html = `<div class="team-title ${takim}-title">${takim.toUpperCase()}</div>`;
+        maclar[takim].forEach((mac, index) => {
+            let key = `${takim}_${index+1}`;
+            let selectedVal = dataStore[key] || '';
+            let nameAttr = isTahmin ? `tahmin_${key}` : `sonuc_${key}`;
+            html += `
+            <div class="match-row">
+                <span>${mac}</span>
+                <div class="options">
+                    <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''}> <span>G</span></label>
+                    <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''}> <span>B</span></label>
+                    <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''}> <span>M</span></label>
+                </div>
+            </div>`;
+        });
+        return html;
+    }
+
+    function renderTahminArayuzu() {
+        let userTahminler = localData.users[currentUser] || {};
+        document.getElementById('tahminListesi').innerHTML = 
+            olusturMacSatirlari('gs', 'tahmin', userTahminler, true) + 
+            olusturMacSatirlari('fb', 'tahmin', userTahminler, true);
+    }
+
+    function renderSonucArayuzu() {
+        document.getElementById('sonucListesi').innerHTML = 
+            olusturMacSatirlari('gs', 'sonuc', localData.gercekSonuclar, false) + 
+            olusturMacSatirlari('fb', 'sonuc', localData.gercekSonuclar, false);
+    }
+
+    window.kaydetTahminler = async function() {
+        let userTahminler = {};
+        ['gs', 'fb'].forEach(takim => {
+            maclar[takim].forEach((mac, index) => {
+                let key = `${takim}_${index+1}`;
+                let selected = document.querySelector(`input[name="tahmin_${key}"]:checked`);
+                if (selected) userTahminler[key] = selected.value;
+            });
+        });
+        await set(ref(db, `sl_tahmin_oyunu/users/${currentUser}`), userTahminler);
+        showNotification("Tahminlerin buluta kaydedildi!");
+    };
+
+    window.kaydetGercekSonuclar = async function() {
+        let gercekler = {};
+        ['gs', 'fb'].forEach(takim => {
+            maclar[takim].forEach((mac, index) => {
+                let key = `${takim}_${index+1}`;
+                let selected = document.querySelector(`input[name="sonuc_${key}"]:checked`);
+                if (selected) gercekler[key] = selected.value;
+            });
+        });
+        await set(ref(db, `sl_tahmin_oyunu/gercekSonuclar`), gercekler);
+        showNotification("Gerçek sonuçlar buluta kaydedildi!");
+    };
+
+    function hesaplaVeRenderPuanDurumu() {
+        let puanlar = [];
+        for (let user in localData.users) {
+            let dogruSayisi = 0;
+            let tahminler = localData.users[user];
+            for (let matchKey in localData.gercekSonuclar) {
+                if (tahminler[matchKey] && tahminler[matchKey] === localData.gercekSonuclar[matchKey]) {
+                    dogruSayisi++;
+                }
+            }
+            puanlar.push({ isim: user, dogru: dogruSayisi, puan: dogruSayisi * 3 });
+        }
+        puanlar.sort((a, b) => b.puan - a.puan);
+
+        let tbody = document.getElementById('puanTablosuBody');
+        tbody.innerHTML = '';
+        puanlar.forEach((p, index) => {
+            tbody.innerHTML += `<tr><td>${index + 1}</td><td>${p.isim}</td><td>${p.dogru} / 16</td><td><strong>${p.puan}</strong></td></tr>`;
+        });
+    }
+</script>
+
+</body>
+</html>
