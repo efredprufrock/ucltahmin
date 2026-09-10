@@ -299,6 +299,7 @@
                 <button class="tab-btn active" onclick="showTab('puanTab')"><i class="fa-solid fa-ranking-star"></i> Puan Durumu</button>
                 <button class="tab-btn" onclick="showTab('tahminTab')"><i class="fa-solid fa-pen-to-square"></i> Tahmin Yap</button>
                 <button class="tab-btn" onclick="showTab('sonucTab')"><i class="fa-solid fa-clipboard-check"></i> Gerçek Sonuçlar</button>
+                <button class="tab-btn" onclick="showTab('herkesinTahminleriTab')"><i class="fa-solid fa-users"></i> Herkesin Tahminleri</button>
             </div>
         </div>
 
@@ -328,6 +329,12 @@
             <p style="font-size: 13px; color: #da3633; text-align: center; font-weight: 600; margin-bottom: 25px;">Oynanan maçların gerçek sonuçlarını buradan girin.</p>
             <div id="sonucListesi"></div>
             
+        </div>
+
+        <div id="herkesinTahminleriTab" class="section glass-card">
+            <h3 style="text-align: center; margin-top: 0;">Herkesin Tahminleri</h3>
+            <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">Tüm katılımcıların haftalık tahminlerini buradan inceleyebilirsiniz.</p>
+            <div id="herkesinTahminleriListesi"></div>
         </div>
     </div>
 </div>
@@ -401,6 +408,7 @@
                 renderTahminArayuzu();
                 renderSonucArayuzu();
                 hesaplaVeRenderPuanDurumu();
+                renderHerkesinTahminleri();
             }
         }
     });
@@ -437,6 +445,7 @@
         renderTahminArayuzu();
         renderSonucArayuzu();
         hesaplaVeRenderPuanDurumu();
+        renderHerkesinTahminleri();
     };
 
     window.logout = function() {
@@ -495,9 +504,9 @@
         let disabledInput = "";
 
         if (isTahmin) {
-            if (index === 0) { // 1. Hafta (Her zaman açık)
-                canPredict = true;
-                lockHtml = `<span class="lock-status" style="color:#2ea043;"><i class="fa-solid fa-unlock"></i> Açık</span>`;
+            if (index === 0) { // 1. Hafta (Kilitlendi)
+                canPredict = false;
+                lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
             } else { // 2-8. Haftalar (1 Hf kala açılır, son 5 dk kapanır)
                 if (daysLeft > 7) {
                         canPredict = false;
@@ -567,6 +576,93 @@
         document.getElementById('sonucListesi').innerHTML = olusturHaftaArayuzu(localData.gercekSonuclar, false);
     }
 
+    function renderHerkesinTahminleri() {
+        // İsimleri alfabetik olarak sıraladık
+        const users = ['Emrah', 'Fatih', 'Sedat', 'Soner', 'Yasin', 'Yiğit'];
+        let html = '';
+        
+        for (let i = 0; i < 8; i++) {
+            html += `<div class="week-card"><h4 class="week-title">${i + 1}. HAFTA</h4>`;
+            html += `<div style="overflow-x: auto;"><table><thead><tr><th style="text-align:left;">Maç</th>`;
+            
+            // Sütun başlıklarına isimleri ekle
+            users.forEach(user => {
+                html += `<th>${user}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+            
+            // Maçları satır satır ekle
+            ['gs', 'fb'].forEach(takim => {
+                let mac = maclar[takim][i];
+                let key = `${takim}_${i+1}`;
+                
+                // GS veya FB logoları (Tıklayarak manuel yüklenebilir)
+                let gsLogo = (localData.teamLogos && localData.teamLogos['gs_logo']) ? localData.teamLogos['gs_logo'] : '';
+                let fbLogo = (localData.teamLogos && localData.teamLogos['fb_logo']) ? localData.teamLogos['fb_logo'] : '';
+
+                let takimB = '';
+                if (takim === 'gs') {
+                    if (gsLogo) {
+                        takimB = `<img src="${gsLogo}" onclick="triggerLogoUpload('gs_logo')" title="GS Logosu Yükle (Değiştirmek için tıkla)" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px; object-fit: contain; cursor: pointer; border-radius: 50%; background: rgba(255,255,255,0.1);">`;
+                    } else {
+                        takimB = `<span onclick="triggerLogoUpload('gs_logo')" class="takim-badge badge-gs" style="cursor:pointer;" title="GS Logosu Yükle (Tıkla)">GS</span>`;
+                    }
+                } else {
+                    if (fbLogo) {
+                        takimB = `<img src="${fbLogo}" onclick="triggerLogoUpload('fb_logo')" title="FB Logosu Yükle (Değiştirmek için tıkla)" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px; object-fit: contain; cursor: pointer; border-radius: 50%; background: rgba(255,255,255,0.1);">`;
+                    } else {
+                        takimB = `<span onclick="triggerLogoUpload('fb_logo')" class="takim-badge badge-fb" style="cursor:pointer;" title="FB Logosu Yükle (Tıkla)">FB</span>`;
+                    }
+                }
+                
+                // Rakip takımın logolarını al
+                let rakipLogoSrc = (localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo;
+                
+                html += `<tr>
+                            <td style="text-align:left; white-space: nowrap;">
+                                ${takimB} 
+                                <span style="font-size: 11px; color: #8bb4e5; margin: 0 5px; font-weight: 800; vertical-align: middle; letter-spacing: 1px;">VS</span>
+                                <img src="${rakipLogoSrc}" style="width: 24px; height: 24px; vertical-align: middle; border-radius: 50%; margin-right: 6px; background: rgba(255,255,255,0.1); padding: 2px; object-fit: contain;" onerror="this.style.display='none'">
+                                <span style="vertical-align: middle;">${mac.text}</span>
+                            </td>`;
+                
+                // Her katılımcının bu maça yaptığı tahmini çek
+                users.forEach(user => {
+                    let tahmin = (localData.users[user] && localData.users[user][key]) ? localData.users[user][key] : '-';
+                    let gercekSonuc = localData.gercekSonuclar[key]; // Oynanmış maçın sonucunu al
+                    let renk = '#fff';
+                    let highlight = '';
+                    
+                    // Harf renkleri (Varsayılan)
+                    if(tahmin === 'G') renk = '#2ea043';
+                    if(tahmin === 'B') renk = '#ff9800';
+                    if(tahmin === 'M') renk = '#da3633';
+
+                    // Maç oynandıysa ve tahmin yapılmışsa isabet kontrolü
+                    if (gercekSonuc && tahmin !== '-') {
+                        if (tahmin === gercekSonuc) {
+                            // İsabet (Yeşil ve Parlak Vurgu)
+                            highlight = 'background: rgba(46, 160, 67, 0.25); border: 1px solid #2ea043; box-shadow: 0 0 10px rgba(46,160,67,0.3);';
+                        } else {
+                            // Iska (Soluk Vurgu)
+                            highlight = 'background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0.3; filter: grayscale(1);';
+                        }
+                    }
+                    
+                    html += `<td style="font-weight: 800;">
+                                <span style="color: ${renk}; padding: 4px 10px; border-radius: 6px; display: inline-block; transition: 0.3s; ${highlight}">${tahmin}</span>
+                             </td>`;
+                });
+                
+                html += `</tr>`;
+            });
+            
+            html += `</tbody></table></div></div>`;
+        }
+        
+        document.getElementById('herkesinTahminleriListesi').innerHTML = html;
+    }
+
     window.kaydetTahminler = async function() {
         let userTahminler = localData.users[currentUser] || {}; 
         ['gs', 'fb'].forEach(takim => {
@@ -600,9 +696,10 @@
 
     function hesaplaVeRenderPuanDurumu() {
         let puanlar = [];
-        let bitenHaftalar = 0;
+        let oynananMacSayisi = 0;
         for (let i = 1; i <= 8; i++) {
-            if (localData.gercekSonuclar[`gs_${i}`] || localData.gercekSonuclar[`fb_${i}`]) bitenHaftalar++;
+            if (localData.gercekSonuclar[`gs_${i}`]) oynananMacSayisi++;
+            if (localData.gercekSonuclar[`fb_${i}`]) oynananMacSayisi++;
         }
 
         // Tasarımdaki tüm isimlerin tabloda çıkmasını sağlamak için mevcut db'yi de hesaba katalım.
@@ -656,7 +753,7 @@
                     </div>
                     ${p.isim}
                 </td>
-                <td>${p.dogru} / ${bitenHaftalar * 2}</td>
+                <td>${p.dogru} / ${oynananMacSayisi}</td>
                 <td class="score-col">${p.puan}</td>
             </tr>`;
         });
