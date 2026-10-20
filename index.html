@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
     <title>ŞL Tahmin Oyunu</title>
     <!-- Google Fonts: Inter (Ana Font) ve Caveat (El Yazısı) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
@@ -121,7 +121,7 @@
         tr:hover td { background: rgba(0, 163, 255, 0.05); }
         tr:last-child td { border-bottom: none; }
         .rank-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; }
-        .name-col { text-align: left !important; display: flex; align-items: center; gap: 15px; font-size: 16px !important;}
+        .name-col { text-align: left !important; font-size: 16px !important; vertical-align: middle; }
         .score-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
 
         .small-avatar {
@@ -181,7 +181,117 @@
         .options input[value="M"]:checked + span { color: #da3633; }
         .options.disabled label { opacity: 0.3; cursor: not-allowed; }
 
+        /* YENİ SKOR GİRİŞİ CSS */
+        .score-input-container { display: flex; align-items: center; gap: 10px; justify-content: center; flex: 1; width: 100%; }
+        .skor-input { width: 45px; height: 40px; text-align: center; font-size: 18px; font-weight: 800; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; outline: none; transition: 0.2s; }
+        .skor-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0,163,255,0.4); background: rgba(0,163,255,0.1); }
+        .skor-input::-webkit-outer-spin-button, .skor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .skor-input[type=number] { -moz-appearance: textfield; }
+
+        /* ÖZEL TARİH VE 15 DAKİKALIK ADIM SEÇİCİ */
+        .datetime-edit-box { 
+            display: none; 
+            margin-top: 8px; 
+            background: rgba(1, 10, 31, 0.95);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 20px rgba(0, 163, 255, 0.25);
+            animation: fadeIn 0.2s ease-out;
+            position: absolute;
+            z-index: 10;
+            width: 240px;
+        }
+        .datetime-edit-box.active { display: block; }
+        .time-stepper-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 5px; }
+        .time-stepper-row:last-child { margin-bottom: 0; }
+        .stepper-btn { background: rgba(0, 163, 255, 0.2); border: 1px solid var(--neon-blue); color: #fff; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .stepper-btn:hover { background: var(--neon-blue); box-shadow: 0 0 10px rgba(0,163,255,0.5); }
+        .stepper-val { font-size: 14px; font-weight: 800; color: #fff; text-align: center; flex: 1; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .datetime-edit-box input[type="datetime-local"] {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 163, 255, 0.3);
+            color: #fff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .datetime-edit-box input[type="datetime-local"]:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 8px rgba(0, 163, 255, 0.5);
+        }
+        /* Tarih seçicinin takvim ikonunu mavi tonuna uydurma */
+        .datetime-edit-box input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(100%) contrast(100%);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: 0.2s;
+        }
+        .datetime-edit-box input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
         .notification { background: #2ea043; color: white; text-align: center; padding: 12px; border-radius: 8px; display: none; margin-bottom: 20px; font-weight: 600; }
+
+        /* PUAN TABLOSU - MİNİ LOGOLU TAHMİN VURGULARI */
+        .predictions-container {
+            display: flex;
+            flex-direction: column; /* Alt alta dizilim */
+            gap: 8px;
+            align-items: flex-start; /* Sola hizala */
+            justify-content: center;
+            width: max-content;
+            margin: 0 auto;
+        }
+        .prediction-team-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px 8px 4px 4px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .main-team-logo {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: rgba(255,255,255,0.1);
+            padding: 2px;
+            margin-right: 6px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .mini-opponent-logo {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: rgba(255,255,255,0.1);
+            padding: 2px;
+            transition: 0.2s;
+        }
+        .logo-correct {
+            border: 1px solid #2ea043;
+            box-shadow: 0 0 8px 1px #2ea043;
+        }
+        .logo-incorrect {
+            border: 1px solid #da3633;
+            box-shadow: 0 0 8px 1px #da3633;
+            opacity: 0.6; 
+            filter: grayscale(0.5);
+        }
+        .logo-upcoming {
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
 
         @media (max-width: 768px) {
             .fixtures-container { flex-direction: column; gap: 30px; }
@@ -201,18 +311,36 @@
         .badge-fb { background: var(--fb-color1); color: #fff; }
         .team-logo-wrapper { cursor: pointer; transition: 0.2s; display: inline-block; }
         .team-logo-wrapper:hover { transform: scale(1.15); filter: brightness(1.3); }
+        /* KÖŞE YAZILARI YER DEĞİŞTİRME STİLLERİ */
+        .swapped-left {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            letter-spacing: 2px;
+            line-height: 1.6;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #d0e5ff;
+        }
+        .swapped-right {
+            font-family: 'Caveat', cursive;
+            font-size: 42px;
+            transform: rotate(-8deg);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: #fff;
+            line-height: 0.9;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="top-header">
-        <div class="header-left">DOĞRU TAHMİN<br>DAHA FAZLA<br>PUAN</div>
+        <div class="swapped-left">DOĞRU TAHMİN<br>DAHA FAZLA<br>PUAN</div>
         <div class="header-center">
             <i class="fa-regular fa-futbol"></i>
             <div>UEFA<br>CHAMPIONS<br>LEAGUE</div>
         </div>
-        <div class="header-right">Tahmin<br>Oyunu</div>
+        <div class="swapped-right">Tahmin<br>Oyunu</div>
     </div>
 
     <div id="notification" class="notification">Veriler güncellendi!</div>
@@ -298,7 +426,7 @@
             <div class="tabs">
                 <button class="tab-btn active" onclick="showTab('puanTab')"><i class="fa-solid fa-ranking-star"></i> Puan Durumu</button>
                 <button class="tab-btn" onclick="showTab('tahminTab')"><i class="fa-solid fa-pen-to-square"></i> Tahmin Yap</button>
-                <button class="tab-btn" onclick="showTab('sonucTab')"><i class="fa-solid fa-clipboard-check"></i> Gerçek Sonuçlar</button>
+                <button id="adminTabBtn" class="tab-btn" onclick="showTab('sonucTab')" style="display: none;"><i class="fa-solid fa-clipboard-check"></i> Gerçek Sonuçlar</button>
                 <button class="tab-btn" onclick="showTab('herkesinTahminleriTab')"><i class="fa-solid fa-users"></i> Herkesin Tahminleri</button>
             </div>
         </div>
@@ -357,8 +485,8 @@
     const db = getDatabase(app);
 
     let currentUser = "";
-    let currentUserId = ""; // Dosya isimleriyle (emrah, fatih vb.) eşleştirmek için
-    let localData = { users: {}, gercekSonuclar: {}, teamLogos: {} };
+    let currentUserId = ""; 
+    let localData = { users: {}, gercekSonuclar: {}, teamLogos: {}, macTarihleri: {} };
     
     // Fotoğraf ID haritası (Kullanıcı isimlerini dosya isimlerine eşler)
     const avatarMap = { 'Emrah':'emrah', 'Fatih':'fatih', 'Yiğit':'yigit', 'Soner':'soner', 'Sedat':'sedat', 'Yasin':'yasin' };
@@ -394,6 +522,7 @@
             localData.users = data.users || {};
             localData.gercekSonuclar = data.gercekSonuclar || {};
             localData.teamLogos = data.teamLogos || {};
+            localData.macTarihleri = data.macTarihleri || {};
             
             if(currentUser) {
                 // Üst bardaki avatarı yüklenen fotoğrafla güncelle
@@ -434,6 +563,13 @@
 
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('appContainer').style.display = 'block';
+        
+        // Sadece Yiğit giriş yaptığında Gerçek Sonuçlar sekmesini göster
+        if (isim === 'Yiğit') {
+            document.getElementById('adminTabBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('adminTabBtn').style.display = 'none';
+        }
         
         // Üst bardaki avatar ve ismi güncelle
         document.getElementById('currentUserDisplay').innerText = currentUser;
@@ -494,7 +630,10 @@
         let selectedVal = dataStore[key] || '';
         let nameAttr = isTahmin ? `tahmin_${key}` : `sonuc_${key}`;
         
-        let matchDate = new Date(mac.date);
+        // Sabit tarih yerine varsa Firebase'deki güncel tarihi çek
+        let dynamicDate = (localData.macTarihleri && localData.macTarihleri[key]) ? localData.macTarihleri[key] : mac.date;
+        let matchDate = new Date(dynamicDate);
+        
         let minutesLeft = (matchDate - now) / (1000 * 60);
         let daysLeft = minutesLeft / (60 * 24);
         
@@ -504,16 +643,15 @@
         let disabledInput = "";
 
         if (isTahmin) {
-            if (index === 0) { // 1. Hafta (Kilitlendi)
+            if (index === 0) { // 1. Hafta Kilitlendi
                 canPredict = false;
                 lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
-            } else { // 2-8. Haftalar (1 Hf kala açılır, son 5 dk kapanır)
+            } else { // 2-8 Haftalar
                 if (daysLeft > 7) {
-                        canPredict = false;
-                        // Panel açılış zamanını (maçtan tam 7 gün öncesini) hesaplayıp HTML'e veri olarak gömüyoruz
-                        let openDateMs = matchDate.getTime() - (7 * 24 * 60 * 60 * 1000);
-                        lockHtml = `<span class="lock-status countdown-timer" data-target="${openDateMs}" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> <span class="timer-text">Hesaplanıyor...</span></span>`;
-                    } else if (minutesLeft <= 5) {
+                    canPredict = false;
+                    let openDateMs = matchDate.getTime() - (7 * 24 * 60 * 60 * 1000);
+                    lockHtml = `<span class="lock-status countdown-timer" data-target="${openDateMs}" style="color:#fdb912;"><i class="fa-solid fa-hourglass-start"></i> <span class="timer-text">Hesaplanıyor...</span></span>`;
+                } else if (minutesLeft <= 5) {
                     canPredict = false;
                     lockHtml = `<span class="lock-status" style="color:#da3633;"><i class="fa-solid fa-lock"></i> Kilitlendi</span>`;
                 } else {
@@ -528,41 +666,94 @@
         }
         
         let formattedDate = matchDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-        let takimBadge = takim === 'gs' ? '<span class="takim-badge badge-gs">GALATASARAY</span>' : '<span class="takim-badge badge-fb">FENERBAHÇE</span>';
-        
-        // YENİ: Hangi ekranda (Tahmin veya Gerçek Sonuç) olduğumuza göre tetiklenecek fonksiyonu belirliyoruz
         let onChangeFn = isTahmin ? 'kaydetTahminler()' : 'kaydetGercekSonuclar()';
-        
-        return `
-        <div class="single-match-col">
-            <!-- ÜST KISIM: Takım, Tarih ve Rakip İsim -->
-            <div class="match-info-top" style="align-items: flex-start; margin-bottom: 15px;">
-                <div>
-                    ${takimBadge}
-                    <div style="font-size: 11px; color: #8bb4e5; margin-top: 5px; font-weight: 600;">
-                        <i class="fa-regular fa-clock"></i> ${formattedDate}
-                    </div>
-                    <div class="team-name-wrapper" style="margin-top: 8px;">
-                        <span class="team-name" style="font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">${mac.text}</span>
-                    </div>
-                </div>
-                ${lockHtml}
-            </div>
-            
-            <!-- ALT KISIM: Logo Sola, Butonlar Sağa (Yan Yana) -->
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <!-- Büyük Logo Alanı -->
-                <div class="team-logo-wrapper" onclick="triggerLogoUpload('${key}')" title="Yeni Logo Yükle" style="flex-shrink: 0;">
-                    <img src="${(localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo}" class="team-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                    <i class="fa-solid fa-shield-halved team-logo-img" style="display:none; text-align:center; line-height:46px; font-size:24px; color:#8bb4e5;"></i>
-                </div>
-                
-                <!-- Tahmin Butonları -->
-                <div class="options ${disabledClass}" style="flex: 1; width: 100%;">
+
+        let isHome = mac.text.includes('(E)');
+
+        let rakipLogoHtml = `
+            <div class="team-logo-wrapper" onclick="triggerLogoUpload('${key}')" title="Rakip Logosu Yükle" style="flex-shrink: 0;">
+                <img src="${(localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo}" class="team-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                <i class="fa-solid fa-shield-halved team-logo-img" style="display:none; text-align:center; line-height:46px; font-size:24px; color:#8bb4e5;"></i>
+            </div>`;
+
+        let mainLogoKey = `${takim}_logo`;
+        let defaultMainColor = takim === 'gs' ? 'var(--gs-color1)' : 'var(--fb-color1)';
+        let anaTakimLogoHtml = `
+            <div class="team-logo-wrapper" style="flex-shrink: 0;">
+                ${(localData.teamLogos && localData.teamLogos[mainLogoKey]) 
+                    ? `<img src="${localData.teamLogos[mainLogoKey]}" class="team-logo-img" style="cursor: pointer;" onclick="triggerLogoUpload('${mainLogoKey}')" title="Logoyu Değiştir">` 
+                    : `<div class="team-logo-img" onclick="triggerLogoUpload('${mainLogoKey}')" style="display:flex; align-items:center; justify-content:center; background:${defaultMainColor}; color:#fff; font-weight:800; font-size:16px; cursor: pointer;" title="Logo Yükle">\${takim.toUpperCase()}</div>`}
+            </div>`;
+
+        let sagTarafHtml = '';
+        if (isTahmin) {
+            sagTarafHtml = `
+                <div class="options ${disabledClass}" style="flex: 1; width: 100%; margin: 0 5px;">
                     <label><input type="radio" name="${nameAttr}" value="G" ${selectedVal === 'G' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>G</span></label>
                     <label><input type="radio" name="${nameAttr}" value="B" ${selectedVal === 'B' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>B</span></label>
                     <label><input type="radio" name="${nameAttr}" value="M" ${selectedVal === 'M' ? 'checked' : ''} ${disabledInput} onchange="${onChangeFn}"> <span>M</span></label>
-                </div>
+                </div>`;
+        } else {
+            let skorTakim = localData.gercekSonuclar[`${key}_takim`] !== undefined ? localData.gercekSonuclar[`${key}_takim`] : '';
+            let skorRakip = localData.gercekSonuclar[`${key}_rakip`] !== undefined ? localData.gercekSonuclar[`${key}_rakip`] : '';
+            
+            let takimSkorBlok = `
+                <div style="display:flex; flex-direction:column; align-items:center; gap: 4px;">
+                    <span style="font-size:9px; color:#a5ccff; font-weight:800;">${takim.toUpperCase()}</span>
+                    <input type="number" id="skor_takim_${key}" value="${skorTakim}" class="skor-input" min="0" oninput="${onChangeFn}">
+                </div>`;
+                
+            let rakipSkorBlok = `
+                <div style="display:flex; flex-direction:column; align-items:center; gap: 4px;">
+                    <span style="font-size:9px; color:#a5ccff; font-weight:800;">RAKİP</span>
+                    <input type="number" id="skor_rakip_${key}" value="${skorRakip}" class="skor-input" min="0" oninput="${onChangeFn}">
+                </div>`;
+            
+            let skorSol = isHome ? takimSkorBlok : rakipSkorBlok;
+            let skorSag = isHome ? rakipSkorBlok : takimSkorBlok;
+
+            sagTarafHtml = `
+                <div class="score-input-container" style="margin: 0 5px;">
+                    ${skorSol}
+                    <span style="font-weight:800; color:#fff; font-size: 20px;">-</span>
+                    ${skorSag}
+                </div>`;
+        }
+
+        let solLogo = isHome ? anaTakimLogoHtml : rakipLogoHtml;
+        let sagLogo = isHome ? rakipLogoHtml : anaTakimLogoHtml;
+
+        // --- TARİH DÜZENLEME INPUTU (Sadece Yönetici Panelinde) ---
+        let tarihHtml = "";
+        if (!isTahmin) {
+            let inputVal = dynamicDate.substring(0, 16); 
+            tarihHtml = `
+                <div style="position: relative;">
+                    <div style="font-size: 11px; color: #8bb4e5; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; background: rgba(0, 163, 255, 0.08); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(0, 163, 255, 0.2); transition: 0.2s;" onclick="toggleDateEdit('${key}')" title="Tarih ve Saati Değiştir">
+                        <i class="fa-regular fa-clock" style="color: var(--neon-blue);"></i> ${formattedDate} <i class="fa-solid fa-pen" style="font-size: 9px; opacity: 0.7;"></i>
+                    </div>
+                    <div id="datetime_box_${key}" class="datetime-edit-box">
+                        <input type="datetime-local" id="tarih_${key}" value="${inputVal}" onchange="kaydetMacTarihi('${key}')">
+                    </div>
+                </div>`;
+        } else {
+            tarihHtml = `
+                <div style="font-size: 11px; color: #8bb4e5; font-weight: 600;">
+                    <i class="fa-regular fa-clock"></i> ${formattedDate}
+                </div>`;
+        }
+
+        return `
+        <div class="single-match-col">
+            <div class="match-info-top" style="align-items: flex-start; margin-bottom: 15px;">
+                ${tarihHtml}
+                ${lockHtml}
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
+                ${solLogo}
+                ${sagTarafHtml}
+                ${sagLogo}
             </div>
         </div>`;
     }
@@ -583,7 +774,7 @@
         
         for (let i = 0; i < 8; i++) {
             html += `<div class="week-card"><h4 class="week-title">${i + 1}. HAFTA</h4>`;
-            html += `<div style="overflow-x: auto;"><table><thead><tr><th style="text-align:left;">Maç</th>`;
+            html += `<div style="overflow-x: auto;"><table><thead><tr><th style="text-align:center;">Maç</th>`;
             
             // Sütun başlıklarına isimleri ekle
             users.forEach(user => {
@@ -617,13 +808,18 @@
                 
                 // Rakip takımın logolarını al
                 let rakipLogoSrc = (localData.teamLogos && localData.teamLogos[key]) ? localData.teamLogos[key] : mac.logo;
+                let rakipB = `<img src="${rakipLogoSrc}" style="width: 24px; height: 24px; vertical-align: middle; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 2px; object-fit: contain;" onerror="this.style.display='none'">`;
+                
+                // Ev sahibi (E) / Deplasman (D) kontrolü ile logoların yerini belirle
+                let isHome = mac.text.includes('(E)');
+                let solLogo = isHome ? takimB : rakipB;
+                let sagLogo = isHome ? rakipB : takimB;
                 
                 html += `<tr>
-                            <td style="text-align:left; white-space: nowrap;">
-                                ${takimB} 
+                            <td style="text-align:center; white-space: nowrap;">
+                                ${solLogo} 
                                 <span style="font-size: 11px; color: #8bb4e5; margin: 0 5px; font-weight: 800; vertical-align: middle; letter-spacing: 1px;">VS</span>
-                                <img src="${rakipLogoSrc}" style="width: 24px; height: 24px; vertical-align: middle; border-radius: 50%; margin-right: 6px; background: rgba(255,255,255,0.1); padding: 2px; object-fit: contain;" onerror="this.style.display='none'">
-                                <span style="vertical-align: middle;">${mac.text}</span>
+                                ${sagLogo}
                             </td>`;
                 
                 // Her katılımcının bu maça yaptığı tahmini çek
@@ -686,12 +882,48 @@
         ['gs', 'fb'].forEach(takim => {
             maclar[takim].forEach((mac, index) => {
                 let key = `${takim}_${index+1}`;
-                let selected = document.querySelector(`input[name="sonuc_${key}"]:checked`);
-                if (selected) gercekler[key] = selected.value;
+                let takimInput = document.getElementById(`skor_takim_${key}`);
+                let rakipInput = document.getElementById(`skor_rakip_${key}`);
+                
+                // İki tarafa da skor girilmişse hesapla
+                if (takimInput && rakipInput && takimInput.value !== "" && rakipInput.value !== "") {
+                    let tScore = parseInt(takimInput.value);
+                    let rScore = parseInt(rakipInput.value);
+                    
+                    // Skoru veritabanında sakla
+                    gercekler[`${key}_takim`] = tScore;
+                    gercekler[`${key}_rakip`] = rScore;
+                    
+                    // Girilen skordan Galibiyet / Beraberlik / Mağlubiyet sonucunu çıkarıp puan için sakla
+                    if (tScore > rScore) gercekler[key] = 'G';
+                    else if (tScore === rScore) gercekler[key] = 'B';
+                    else gercekler[key] = 'M';
+                }
             });
         });
+        
         await set(ref(db, `sl_tahmin_oyunu/gercekSonuclar`), gercekler);
-        showNotification("Gerçek sonuç buluta kaydedildi ✓");
+        showNotification("Maç skorları kaydedildi ✓");
+    };
+
+    window.kaydetMacTarihi = async function(key) {
+        let input = document.getElementById(`tarih_${key}`);
+        if(input && input.value) {
+            // Inputtan gelen formata (YYYY-MM-DDTHH:mm) saniye ekleyerek sakla
+            let tamTarih = input.value + ":00";
+            await set(ref(db, `sl_tahmin_oyunu/macTarihleri/${key}`), tamTarih);
+            showNotification("Maç tarihi güncellendi ✓");
+            
+            // Tarih değiştiği anda Tahmin ekranındaki kilit hesaplamalarının yenilenmesi için arayüzü tekrar render et
+            renderTahminArayuzu(); 
+        }
+    };
+
+    window.toggleDateEdit = function(key) {
+        let box = document.getElementById(`datetime_box_${key}`);
+        if (box) {
+            box.classList.toggle('active');
+        }
     };
 
     function hesaplaVeRenderPuanDurumu() {
@@ -702,18 +934,25 @@
             if (localData.gercekSonuclar[`fb_${i}`]) oynananMacSayisi++;
         }
 
-        // Tasarımdaki tüm isimlerin tabloda çıkmasını sağlamak için mevcut db'yi de hesaba katalım.
-        // Eğer db boşsa bile önceden tanımlı isimleri listeye koyabiliriz ama şuan aktif oynayanları gösteriyoruz.
         const knownUsers = ['Emrah', 'Fatih', 'Yiğit', 'Soner', 'Sedat', 'Yasin'];
         
         let displayUsers = Object.keys(localData.users);
-        // Henüz giriş yapmayan ama listede olması gerekenleri de ekleyelim
         knownUsers.forEach(ku => { if(!displayUsers.includes(ku)) displayUsers.push(ku); });
+
+        // Ana GS ve FB logolarını veya rozetlerini al (En solda göstermek için)
+        let gsMainLogo = (localData.teamLogos && localData.teamLogos['gs_logo']) ? localData.teamLogos['gs_logo'] : ''; 
+        let fbMainLogo = (localData.teamLogos && localData.teamLogos['fb_logo']) ? localData.teamLogos['fb_logo'] : '';
+        
+        let gsMainHtml = gsMainLogo ? `<img src="${gsMainLogo}" class="main-team-logo">` : `<span class="takim-badge badge-gs" style="margin-right:8px; margin-bottom:0;">GS</span>`;
+        let fbMainHtml = fbMainLogo ? `<img src="${fbMainLogo}" class="main-team-logo">` : `<span class="takim-badge badge-fb" style="margin-right:8px; margin-bottom:0;">FB</span>`;
 
         displayUsers.forEach(user => {
             let dogruSayisi = 0; 
             let toplamPuan = 0; 
             let tahminler = localData.users[user] || {};
+            
+            let gsRowHtml = '';
+            let fbRowHtml = '';
             
             for (let i = 1; i <= 8; i++) {
                 let gs_key = `gs_${i}`;
@@ -724,13 +963,39 @@
                 
                 let buHaftakiDogru = 0;
 
-                if (gs_gercek && tahminler[gs_key] === gs_gercek) { buHaftakiDogru++; dogruSayisi++; }
-                if (fb_gercek && tahminler[fb_key] === fb_gercek) { buHaftakiDogru++; dogruSayisi++; }
+                // GS Maçı
+                let gsLogoSrc = (localData.teamLogos && localData.teamLogos[gs_key]) ? localData.teamLogos[gs_key] : maclar.gs[i-1].logo;
+                if (gs_gercek) {
+                    let isCorrect = (tahminler[gs_key] === gs_gercek && tahminler[gs_key] !== '-');
+                    if (isCorrect) { buHaftakiDogru++; dogruSayisi++; }
+                    let statusClass = isCorrect ? 'logo-correct' : 'logo-incorrect';
+                    gsRowHtml += `<img src="${gsLogoSrc}" class="mini-opponent-logo ${statusClass}" title="${i}. Hafta GS - Tahmin: ${isCorrect ? 'Doğru' : 'Yanlış'}">`;
+                } else {
+                    gsRowHtml += `<img src="${gsLogoSrc}" class="mini-opponent-logo logo-upcoming" title="${i}. Hafta GS - Henüz Oynanmadı">`;
+                }
+
+                // FB Maçı
+                let fbLogoSrc = (localData.teamLogos && localData.teamLogos[fb_key]) ? localData.teamLogos[fb_key] : maclar.fb[i-1].logo;
+                if (fb_gercek) {
+                    let isCorrect = (tahminler[fb_key] === fb_gercek && tahminler[fb_key] !== '-');
+                    if (isCorrect) { buHaftakiDogru++; dogruSayisi++; }
+                    let statusClass = isCorrect ? 'logo-correct' : 'logo-incorrect';
+                    fbRowHtml += `<img src="${fbLogoSrc}" class="mini-opponent-logo ${statusClass}" title="${i}. Hafta FB - Tahmin: ${isCorrect ? 'Doğru' : 'Yanlış'}">`;
+                } else {
+                    fbRowHtml += `<img src="${fbLogoSrc}" class="mini-opponent-logo logo-upcoming" title="${i}. Hafta FB - Henüz Oynanmadı">`;
+                }
 
                 if (buHaftakiDogru === 2) { toplamPuan += 3; } 
                 else if (buHaftakiDogru === 1) { toplamPuan += 1; }
             }
-            puanlar.push({ isim: user, dogru: dogruSayisi, puan: toplamPuan });
+            
+            // Satırları birleştir
+            let tahminHtml = '<div class="predictions-container">';
+            tahminHtml += `<div class="prediction-team-row">${gsMainHtml}${gsRowHtml}</div>`;
+            tahminHtml += `<div class="prediction-team-row">${fbMainHtml}${fbRowHtml}</div>`;
+            tahminHtml += '</div>';
+
+            puanlar.push({ isim: user, dogru: dogruSayisi, puan: toplamPuan, html: tahminHtml });
         });
         
         puanlar.sort((a, b) => b.puan !== a.puan ? b.puan - a.puan : b.dogru - a.dogru);
@@ -739,7 +1004,6 @@
         tbody.innerHTML = '';
         puanlar.forEach((p, index) => {
             let uId = avatarMap[p.isim] || 'default';
-            // Eğer Firebase'de özel yüklenmiş fotoğraf varsa onu kullan, yoksa eski mantık uId.jpg kullan
             let customPic = (localData.users[p.isim] && localData.users[p.isim].profilePic) 
                             ? localData.users[p.isim].profilePic 
                             : `${uId}.jpg`;
@@ -747,13 +1011,15 @@
             <tr>
                 <td class="rank-col">${index + 1}</td>
                 <td class="name-col">
-                    <div class="small-avatar">
-                        <img src="${customPic}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <i class="fa-solid fa-user" style="display:none;"></i>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div class="small-avatar">
+                            <img src="${customPic}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <i class="fa-solid fa-user" style="display:none;"></i>
+                        </div>
+                        ${p.isim}
                     </div>
-                    ${p.isim}
                 </td>
-                <td>${p.dogru} / ${oynananMacSayisi}</td>
+                <td>${p.html}</td>
                 <td class="score-col">${p.puan}</td>
             </tr>`;
         });
