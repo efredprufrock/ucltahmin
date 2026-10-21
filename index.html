@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.575">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
     <title>ŞL Tahmin Oyunu</title>
     <!-- Google Fonts: Inter (Ana Font) ve Caveat (El Yazısı) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
@@ -32,17 +32,87 @@
             background-attachment: fixed;
             color: var(--text-main); 
             margin: 0; 
-            padding: 20px; 
+            padding: 10px; /* Küçültüldü */
             display: flex;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh; /* Ekrana tam sığması için sabitlendi */
+            overflow: hidden; /* Sayfanın genel scroll'u kapatıldı */
         }
         
-        .container { width: 100%; max-width: 1050px; }
+        .container { 
+            width: 100%; 
+            max-width: 1050px; 
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Kapsayıcıyı tam yüksekliğe ayarla */
+        }
+        
+        #appContainer {
+            display: none; 
+            flex-direction: column;
+            flex: 1;
+            min-height: 0; /* Taşan içeriğin scroll olabilmesi için gerekli */
+        }
+
+        /* Şık Scrollbar Özelleştirmesi */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 163, 255, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 163, 255, 0.8); }
 
         .top-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; padding-top: 10px;
+            margin-bottom: 15px; padding-top: 10px; flex-wrap: wrap; gap: 15px;
+            position: relative;
+            z-index: 999; /* Açılır menünün alttaki elemanların üstünde kalmasını sağlar */
+        }
+        /* Yeni Kompakt Sağ Üst Profil Grubu */
+        .header-profile-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(4, 20, 60, 0.4);
+            border: 1px solid rgba(0, 163, 255, 0.2);
+            padding: 12px 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: fit-content;
+        }
+        .profile-top-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-profile-box .small-avatar {
+            width: 40px; height: 40px; border: 2px solid #a5ccff;
+        }
+        .header-profile-box .user-name-span {
+            font-size: 15px; font-weight: 800; color: #fff; letter-spacing: 0.5px;
+        }
+        .header-profile-box .action-btns {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .header-profile-box .action-btns button {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 6px;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .header-profile-box .action-btns button:hover {
+            background: rgba(0, 163, 255, 0.2);
+            border-color: var(--neon-blue);
         }
         .header-left { font-size: 11px; letter-spacing: 2px; line-height: 1.6; text-transform: uppercase; font-weight: 600; color: #d0e5ff; }
         .header-center { text-align: center; font-weight: 800; font-size: 22px; letter-spacing: 1px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
@@ -53,7 +123,7 @@
             background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border); border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 163, 255, 0.1);
-            padding: 25px; margin-bottom: 25px; animation: fadeIn 0.4s ease-out;
+            padding: 15px; margin-bottom: 10px; animation: fadeIn 0.4s ease-out; /* Daha kompakt */
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -67,7 +137,12 @@
         .tab-btn:hover { background: rgba(0, 163, 255, 0.1); color: #fff; }
         .tab-btn.active { background: var(--neon-blue); border-color: var(--neon-blue); color: #fff; box-shadow: 0 0 15px rgba(0, 163, 255, 0.5); }
 
-        .section { display: none; }
+        .section { 
+            display: none; 
+            flex: 1; 
+            overflow-y: auto; /* Sadece listelerin içi kaydırılabilir */
+            margin-bottom: 0 !important; 
+        }
         .section.active { display: block; }
 
         /* YENİ GİRİŞ EKRANI TASARIMI */
@@ -114,15 +189,25 @@
         .user-name { font-weight: 600; color: #fff; font-size: 16px; letter-spacing: 0.5px; }
 
         /* PUAN TABLOSU VE KÜÇÜK AVATARLAR */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { padding: 15px 10px; text-align: center; color: #a5ccff; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-bottom: 2px solid var(--neon-blue); }
+        table { width: 100%; border-collapse: collapse; margin-top: 0; }
+        th { padding: 4px 10px 10px 10px; text-align: center; color: #a5ccff; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-bottom: 2px solid var(--neon-blue); position: sticky; top: 0; background: rgba(4, 20, 60, 0.95); z-index: 5; }
         th i { margin-right: 5px; font-size: 14px; }
-        td { padding: 16px 10px; text-align: center; border-bottom: 1px solid rgba(0, 163, 255, 0.2); font-size: 16px; font-weight: 600; }
+        td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(0, 163, 255, 0.2); font-size: 16px; font-weight: 600; }
         tr:hover td { background: rgba(0, 163, 255, 0.05); }
         tr:last-child td { border-bottom: none; }
         .rank-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; }
         .name-col { text-align: left !important; font-size: 16px !important; vertical-align: middle; }
         .score-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        
+        /* LİDER İÇİN ALTIN GLOW EFEKTİ */
+        .gold-glow-text {
+            color: #ffd700 !important;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.4) !important;
+        }
+        .gold-glow-avatar {
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.8) !important;
+        }
 
         .small-avatar {
             width: 36px;
@@ -300,10 +385,22 @@
         }
 
         /* HAFTA GÖRÜNÜMÜ VE LOGOLAR İÇİN EKLENEN STİLLER */
-        .week-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; margin-bottom: 25px; }
-        .week-title { text-align: center; color: var(--neon-blue); font-weight: 800; font-size: 16px; margin: 0 0 15px 0; letter-spacing: 1px; }
-        .week-matches { display: flex; gap: 20px; flex-wrap: wrap; }
-        .single-match-col { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .week-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 12px; overflow: hidden; transition: 0.3s; }
+        .week-header { padding: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+        .week-header:hover { background: rgba(0, 163, 255, 0.1); }
+        .week-title { color: var(--neon-blue); font-weight: 800; font-size: 14px; margin: 0; letter-spacing: 1px; }
+        .toggle-icon { transition: transform 0.3s; color: var(--neon-blue); font-size: 12px; }
+        .week-content { padding: 10px; padding-top: 0; display: block; }
+        
+        /* Kapalı Durum Stilleri */
+        .week-card.collapsed .week-content { display: none; }
+        .week-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+        
+        .week-matches { display: flex; gap: 10px; flex-wrap: wrap; }
+        .single-match-col { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* Herkesin Tahminleri Tablosunu Daraltma */
+        #herkesinTahminleriListesi th, #herkesinTahminleriListesi td { padding: 6px 4px; font-size: 14px; }
         .team-logo-img { width: 56px; height: 56px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .team-name-wrapper { display: flex; align-items: center; margin-top: 8px;}
         .takim-badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: 800; margin-right: 8px; letter-spacing: 1px;}
@@ -329,18 +426,100 @@
             color: #fff;
             line-height: 0.9;
         }
+        /* HAMBURGER MENÜ VE DROPDOWN STİLLERİ */
+        .hamburger-btn {
+            background: transparent;
+            border: none;
+            color: #8bb4e5;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hamburger-btn:hover { color: #fff; }
+        
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background: rgba(1, 10, 31, 0.95);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0, 163, 255, 0.25);
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+            z-index: 20;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .profile-dropdown.active {
+            display: flex;
+        }
+        .profile-dropdown button {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 8px 12px;
+            text-align: left;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-dropdown button:hover {
+            background: rgba(0, 163, 255, 0.2);
+            color: var(--neon-blue);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-header">
-        <div class="swapped-left">DOĞRU TAHMİN<br>DAHA FAZLA<br>PUAN</div>
-        <div class="header-center">
-            <i class="fa-regular fa-futbol"></i>
-            <div>UEFA<br>CHAMPIONS<br>LEAGUE</div>
+    <div class="top-header" style="position: relative;">
+        <!-- Sol Köşe: Tahmin Oyunu (El Yazısı Stili) -->
+        <div style="font-family: 'Caveat', cursive; font-size: 42px; transform: rotate(-8deg); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); color: #fff; line-height: 0.9;">
+            Tahmin<br>Oyunu
         </div>
-        <div class="swapped-right">Tahmin<br>Oyunu</div>
+        
+        <!-- Orta: UEFA Champions League Resmi Logosu -->
+        <div style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; align-items: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e2/UEFA_Champions_League_logo.png?utm_source=tr.wikipedia.org&utm_campaign=index&utm_content=thumbnail_unscaled" alt="UEFA Champions League" style="height: 65px; width: auto; object-fit: contain; filter: brightness(0) invert(1);">
+        </div>
+
+        <!-- Sağ Üst: Şık, Kompakt Profil Kutusu (Hamburger Menülü) -->
+        <div id="topHeaderProfile" class="header-profile-box" style="display: none; position: relative; padding: 8px 16px;">
+            <div class="profile-top-row" style="justify-content: space-between; width: 100%; gap: 20px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="small-avatar" id="headerAvatar"></div>
+                    <span id="currentUserDisplay" class="user-name-span"></span>
+                </div>
+                <!-- Hamburger Butonu -->
+                <button class="hamburger-btn" onclick="toggleProfileMenu()" title="Menüyü Aç">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- Açılır Menü (Dropdown) -->
+            <div id="profileDropdown" class="profile-dropdown">
+                <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="uploadProfilePic(event)">
+                <input type="file" id="teamLogoInput" accept="image/*" style="display: none;" onchange="handleTeamLogoUpload(event)">
+                <button onclick="document.getElementById('profilePicInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Yükle</button>
+                <button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+            </div>
+        </div>
+        <!-- Giriş yapılmadığında boşluk dengesi için (Görünmez profil) -->
+        <div id="topHeaderPlaceholder" style="width: 250px;"></div>
     </div>
 
     <div id="notification" class="notification">Veriler güncellendi!</div>
@@ -407,27 +586,13 @@
 
     <!-- Uygulama İçi -->
     <div id="appContainer" style="display: none;">
-        <div class="glass-card">
-            <div class="header-bar">
-                <div style="display: flex; align-items: center; gap: 10px; font-weight: 800;">
-                    <div class="small-avatar" id="headerAvatar"></div>
-                    <span id="currentUserDisplay"></span>
-                </div>
-                <div class="action-btns">
-                    <!-- Gizli dosya yükleme inputu ve tetikleyici butonu -->
-                    <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="uploadProfilePic(event)">
-                    <input type="file" id="teamLogoInput" accept="image/*" style="display: none;" onchange="handleTeamLogoUpload(event)">
-                    <button onclick="document.getElementById('profilePicInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf</button>
-                    
-                    <button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
-                </div>
-            </div>
-
-            <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('puanTab')"><i class="fa-solid fa-ranking-star"></i> Puan Durumu</button>
-                <button class="tab-btn" onclick="showTab('tahminTab')"><i class="fa-solid fa-pen-to-square"></i> Tahmin Yap</button>
-                <button id="adminTabBtn" class="tab-btn" onclick="showTab('sonucTab')" style="display: none;"><i class="fa-solid fa-clipboard-check"></i> Gerçek Sonuçlar</button>
-                <button class="tab-btn" onclick="showTab('herkesinTahminleriTab')"><i class="fa-solid fa-users"></i> Herkesin Tahminleri</button>
+        <div class="glass-card" style="padding: 15px 25px; margin-bottom: 20px;">
+            <!-- Eski .header-bar tamamen kaldırıldı, sadece dairesel ikonlu sekmeler kaldı -->
+            <div class="tabs" style="margin-bottom: 0;">
+                <button class="tab-btn active" onclick="showTab('puanTab')" title="Puan Durumu"><i class="fa-solid fa-ranking-star"></i></button>
+                <button class="tab-btn" onclick="showTab('tahminTab')" title="Tahmin Yap"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button id="adminTabBtn" class="tab-btn" onclick="showTab('sonucTab')" style="display: none;" title="Gerçek Sonuçlar"><i class="fa-solid fa-clipboard-check"></i></button>
+                <button class="tab-btn" onclick="showTab('herkesinTahminleriTab')" title="Herkesin Tahminleri"><i class="fa-solid fa-users"></i></button>
             </div>
         </div>
 
@@ -437,7 +602,7 @@
                     <tr>
                         <th>#</th>
                         <th style="text-align: left;">KATILIMCI</th>
-                        <th><i class="fa-solid fa-bullseye"></i> SONUÇLANAN TAHMİN<br><span style="font-size: 9px; font-weight: 400;">(DOĞRU 1 VEYA 2 TAHMİN)</span></th>
+                        <th><i class="fa-solid fa-bullseye"></i> SONUÇLANAN TAHMİN</th>
                         <th><i class="fa-solid fa-star"></i> PUAN</th>
                     </tr>
                 </thead>
@@ -446,22 +611,20 @@
         </div>
 
         <div id="tahminTab" class="section glass-card">
-            <h3 style="text-align: center; margin-top: 0;">Tahmin Ekranı</h3>
-            <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">İlk maçlar tahmine açıktır. Diğer haftaların maçları maç gününe <b>son 1 hafta kala</b> açılır ve maç saatine son 5 dakika kala kilitlenir.</p>
+            <h3 style="text-align: center; margin-top: 0; margin-bottom: 4px;">Tahmin Ekranı</h3>
+            <p style="font-size: 12px; color: #a5ccff; text-align: center; margin-top: 0; margin-bottom: 12px;">İlk maçlar tahmine açıktır. Diğer haftaların maçları <b>son 1 hafta kala</b> açılır ve maç saatine son 5 dakika kala kilitlenir.</p>
             <div id="tahminListesi"></div>
-            
         </div>
 
         <div id="sonucTab" class="section glass-card">
-            <h3 style="text-align: center; margin-top: 0;">Yönetici Paneli</h3>
-            <p style="font-size: 13px; color: #da3633; text-align: center; font-weight: 600; margin-bottom: 25px;">Oynanan maçların gerçek sonuçlarını buradan girin.</p>
+            <h3 style="text-align: center; margin-top: 0; margin-bottom: 4px;">Yönetici Paneli</h3>
+            <p style="font-size: 12px; color: #da3633; text-align: center; font-weight: 600; margin-top: 0; margin-bottom: 12px;">Oynanan maçların gerçek sonuçlarını buradan girin.</p>
             <div id="sonucListesi"></div>
-            
         </div>
 
         <div id="herkesinTahminleriTab" class="section glass-card">
-            <h3 style="text-align: center; margin-top: 0;">Herkesin Tahminleri</h3>
-            <p style="font-size: 13px; color: #a5ccff; text-align: center; margin-bottom: 25px;">Tüm katılımcıların haftalık tahminlerini buradan inceleyebilirsiniz.</p>
+            <h3 style="text-align: center; margin-top: 0; margin-bottom: 4px;">Herkesin Tahminleri</h3>
+            <p style="font-size: 12px; color: #a5ccff; text-align: center; margin-top: 0; margin-bottom: 12px;">Tüm katılımcıların haftalık tahminlerini buradan inceleyebilirsiniz.</p>
             <div id="herkesinTahminleriListesi"></div>
         </div>
     </div>
@@ -562,7 +725,9 @@
         currentUserId = id;
 
         document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('appContainer').style.display = 'flex';
+        document.getElementById('topHeaderProfile').style.display = 'flex';
+        document.getElementById('topHeaderPlaceholder').style.display = 'none';
         
         // Sadece Yiğit giriş yaptığında Gerçek Sonuçlar sekmesini göster
         if (isim === 'Yiğit') {
@@ -589,6 +754,18 @@
         currentUserId = "";
         document.getElementById('loginSection').style.display = 'block';
         document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('topHeaderProfile').style.display = 'none';
+        document.getElementById('topHeaderPlaceholder').style.display = 'block';
+        
+        // Çıkış yapıldığında açık kalan menüyü kapat
+        let menu = document.getElementById('profileDropdown');
+        if (menu) menu.classList.remove('active');
+    };
+
+    // Hamburger menü açma/kapama fonksiyonu
+    window.toggleProfileMenu = function() {
+        let menu = document.getElementById('profileDropdown');
+        if (menu) menu.classList.toggle('active');
     };
 
     window.silHesap = async function() {
@@ -613,12 +790,26 @@
 
         // 8 Hafta üzerinden döngü
         for (let i = 0; i < 8; i++) {
+            let gs_key = `gs_${i+1}`;
+            let fb_key = `fb_${i+1}`;
+            let gs_date = new Date((localData.macTarihleri && localData.macTarihleri[gs_key]) ? localData.macTarihleri[gs_key] : maclar.gs[i].date);
+            let fb_date = new Date((localData.macTarihleri && localData.macTarihleri[fb_key]) ? localData.macTarihleri[fb_key] : maclar.fb[i].date);
+            
+            // Eğer her iki maçın da saati geçmişse kutuyu daraltılmış (collapsed) yap
+            let isPast = (gs_date < now && fb_date < now);
+            let collapsedClass = isPast ? 'collapsed' : '';
+
             html += `
-            <div class="week-card">
-                <h4 class="week-title">${i + 1}. HAFTA</h4>
-                <div class="week-matches">
-                    ${olusturTekMac('gs', i, maclar.gs[i], dataStore, isTahmin, now)}
-                    ${olusturTekMac('fb', i, maclar.fb[i], dataStore, isTahmin, now)}
+            <div class="week-card ${collapsedClass}">
+                <div class="week-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h4 class="week-title">${i + 1}. HAFTA</h4>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="week-content">
+                    <div class="week-matches">
+                        ${olusturTekMac('gs', i, maclar.gs[i], dataStore, isTahmin, now)}
+                        ${olusturTekMac('fb', i, maclar.fb[i], dataStore, isTahmin, now)}
+                    </div>
                 </div>
             </div>`;
         }
@@ -745,7 +936,7 @@
 
         return `
         <div class="single-match-col">
-            <div class="match-info-top" style="align-items: flex-start; margin-bottom: 15px;">
+            <div class="match-info-top" style="align-items: flex-start; margin-bottom: 8px;">
                 ${tarihHtml}
                 ${lockHtml}
             </div>
@@ -772,9 +963,25 @@
         const users = ['Emrah', 'Fatih', 'Sedat', 'Soner', 'Yasin', 'Yiğit'];
         let html = '';
         
+        const now = new Date();
         for (let i = 0; i < 8; i++) {
-            html += `<div class="week-card"><h4 class="week-title">${i + 1}. HAFTA</h4>`;
-            html += `<div style="overflow-x: auto;"><table><thead><tr><th style="text-align:center;">Maç</th>`;
+            let gs_key = `gs_${i+1}`;
+            let fb_key = `fb_${i+1}`;
+            let gs_date = new Date((localData.macTarihleri && localData.macTarihleri[gs_key]) ? localData.macTarihleri[gs_key] : maclar.gs[i].date);
+            let fb_date = new Date((localData.macTarihleri && localData.macTarihleri[fb_key]) ? localData.macTarihleri[fb_key] : maclar.fb[i].date);
+            
+            let isPast = (gs_date < now && fb_date < now);
+            let collapsedClass = isPast ? 'collapsed' : '';
+
+            html += `
+            <div class="week-card ${collapsedClass}">
+                <div class="week-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h4 class="week-title">${i + 1}. HAFTA</h4>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="week-content">
+                    <div style="overflow-x: auto;">
+                        <table><thead><tr><th style="text-align:center;">Maç</th>`;
             
             // Sütun başlıklarına isimleri ekle
             users.forEach(user => {
@@ -853,7 +1060,7 @@
                 html += `</tr>`;
             });
             
-            html += `</tbody></table></div></div>`;
+            html += `</tbody></table></div></div></div>`; // Fazladan açtığımız week-content divini de kapatıyoruz
         }
         
         document.getElementById('herkesinTahminleriListesi').innerHTML = html;
@@ -1007,20 +1214,26 @@
             let customPic = (localData.users[p.isim] && localData.users[p.isim].profilePic) 
                             ? localData.users[p.isim].profilePic 
                             : `${uId}.jpg`;
+            
+            // Eğer 1. sıradaysa (index 0) altın glow sınıflarını ekle
+            let isLeader = (index === 0);
+            let glowTextClass = isLeader ? 'gold-glow-text' : '';
+            let glowAvatarClass = isLeader ? 'gold-glow-avatar' : '';
+
             tbody.innerHTML += `
             <tr>
-                <td class="rank-col">${index + 1}</td>
+                <td class="rank-col ${glowTextClass}">${index + 1}</td>
                 <td class="name-col">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <div class="small-avatar">
+                        <div class="small-avatar ${glowAvatarClass}">
                             <img src="${customPic}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <i class="fa-solid fa-user" style="display:none;"></i>
                         </div>
-                        ${p.isim}
+                        <span class="${glowTextClass}">${p.isim}</span>
                     </div>
                 </td>
                 <td>${p.html}</td>
-                <td class="score-col">${p.puan}</td>
+                <td class="score-col ${glowTextClass}">${p.puan}</td>
             </tr>`;
         });
     }
