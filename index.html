@@ -189,15 +189,17 @@
         .user-name { font-weight: 600; color: #fff; font-size: 16px; letter-spacing: 0.5px; }
 
         /* PUAN TABLOSU VE KÜÇÜK AVATARLAR */
-        table { width: 100%; border-collapse: collapse; margin-top: 0; }
-        th { padding: 4px 10px 10px 10px; text-align: center; color: #a5ccff; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-bottom: 2px solid var(--neon-blue); position: sticky; top: 0; background: rgba(4, 20, 60, 0.95); z-index: 5; }
+        /* max-width: 650px ile kenarlardaki boşluklar alındı ve merkeze toplandı */
+        table { width: 100%; max-width: 650px; border-collapse: collapse; margin: 0 auto; }
+        th { padding: 4px 5px 8px 5px; text-align: center; color: #a5ccff; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-bottom: 2px solid var(--neon-blue); position: sticky; top: 0; background: rgba(4, 20, 60, 0.95); z-index: 5; }
         th i { margin-right: 5px; font-size: 14px; }
-        td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(0, 163, 255, 0.2); font-size: 16px; font-weight: 600; }
+        /* td dikey padding değeri 10px'ten 4px'e düşürülerek web ekranına tam sığması sağlandı */
+        td { padding: 4px 5px; text-align: center; border-bottom: 1px solid rgba(0, 163, 255, 0.2); font-size: 16px; font-weight: 600; }
         tr:hover td { background: rgba(0, 163, 255, 0.05); }
         tr:last-child td { border-bottom: none; }
-        .rank-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; }
-        .name-col { text-align: left !important; font-size: 16px !important; vertical-align: middle; }
-        .score-col { font-size: 18px !important; font-weight: 800 !important; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .rank-col { font-size: 20px !important; font-weight: 800 !important; color: #fff; }
+        .name-col { text-align: left !important; font-size: 18px !important; vertical-align: middle; font-weight: 700; }
+        .score-col { font-size: 24px !important; font-weight: 800 !important; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
         
         /* LİDER İÇİN ALTIN GLOW EFEKTİ */
         .gold-glow-text {
@@ -210,8 +212,8 @@
         }
 
         .small-avatar {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             border: 1px solid #a5ccff;
             overflow: hidden;
@@ -327,9 +329,9 @@
         /* PUAN TABLOSU - MİNİ LOGOLU TAHMİN VURGULARI */
         .predictions-container {
             display: flex;
-            flex-direction: column; /* Alt alta dizilim */
-            gap: 8px;
-            align-items: flex-start; /* Sola hizala */
+            flex-direction: column;
+            gap: 4px; /* Dikey satır arası boşluk daraltıldı */
+            align-items: flex-start;
             justify-content: center;
             width: max-content;
             margin: 0 auto;
@@ -337,25 +339,25 @@
         .prediction-team-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: rgba(0, 0, 0, 0.2);
-            padding: 4px 8px 4px 4px;
+            padding: 3px 10px 3px 4px; /* Kutu içi dikey boşluk daraltıldı */
             border-radius: 30px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         .main-team-logo {
-            width: 26px;
-            height: 26px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             object-fit: contain;
             background: rgba(255,255,255,0.1);
             padding: 2px;
-            margin-right: 6px;
+            margin-right: 8px;
             box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
         .mini-opponent-logo {
-            width: 22px;
-            height: 22px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             object-fit: contain;
             background: rgba(255,255,255,0.1);
@@ -481,6 +483,39 @@
             background: rgba(0, 163, 255, 0.2);
             color: var(--neon-blue);
         }
+
+        /* MOBİL ÜST BAŞLIK DÜZENLEMESİ */
+        @media (max-width: 768px) {
+            .top-header {
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 10px !important;
+                padding-top: 5px !important;
+                margin-bottom: 10px !important;
+            }
+            /* Sol yazı mobilde ortalanır ve yukarıda yer alır */
+            .top-header > div:first-child {
+                position: static !important;
+                transform: none !important;
+                text-align: center !important;
+                font-size: 32px !important;
+            }
+            /* UCL Logosu mobilde ortalanır */
+            .top-header > div:nth-child(2) {
+                position: static !important;
+                transform: none !important;
+            }
+            /* Sağ üst profil/hamburger butonu mobilde sağ üst köşeye sabitlenir veya akışa uydurulur */
+            #topHeaderProfile {
+                position: absolute !important;
+                top: 5px;
+                right: 5px;
+            }
+            #topHeaderPlaceholder {
+                display: none !important;
+            }
+        }
+
     </style>
 </head>
 <body>
